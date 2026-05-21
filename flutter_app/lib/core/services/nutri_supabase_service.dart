@@ -295,6 +295,94 @@ class NutriSupabaseService {
     return _asMap(response.data);
   }
 
+  Future<FastingSummary> getFastingCurrent() async {
+    final response = await client.functions.invoke(
+      'fasting-current',
+      method: HttpMethod.get,
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
+      return FastingSummary.fromMap(summary);
+    }
+    return FastingSummary.fromMap(data);
+  }
+
+  Future<FastingSummary> startFasting() async {
+    final response = await client.functions.invoke(
+      'fasting-start',
+      method: HttpMethod.post,
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
+      return FastingSummary.fromMap(summary);
+    }
+    return FastingSummary.fromMap(data);
+  }
+
+  Future<FastingSummary> endFasting({
+    String? breakReason,
+  }) async {
+    final response = await client.functions.invoke(
+      'fasting-end',
+      method: HttpMethod.post,
+      body: {
+        if (breakReason != null) 'breakReason': breakReason,
+      },
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
+      return FastingSummary.fromMap(summary);
+    }
+    return FastingSummary.fromMap(data);
+  }
+
+  Future<FastingSummary> updateFastingPlan({
+    required Map<String, dynamic> plan,
+  }) async {
+    final response = await client.functions.invoke(
+      'fasting-plan',
+      method: HttpMethod.patch,
+      body: plan,
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
+      return FastingSummary.fromMap(summary);
+    }
+    return FastingSummary.fromMap(data);
+  }
+
+  Future<List<FastingSession>> loadFastingHistory() async {
+    final response = await client.functions.invoke(
+      'fasting-history',
+      method: HttpMethod.get,
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final history = data['history'];
+    if (history is List) {
+      return history
+          .whereType<Map>()
+          .map((item) => FastingSession.fromMap(Map<String, dynamic>.from(item.cast<String, dynamic>())))
+          .toList();
+    }
+    final sessions = data['sessions'];
+    if (sessions is List) {
+      return sessions
+          .whereType<Map>()
+          .map((item) => FastingSession.fromMap(Map<String, dynamic>.from(item.cast<String, dynamic>())))
+          .toList();
+    }
+    return const [];
+  }
+
   Future<List<FoodSearchResult>> searchFoods({
     required String query,
     String region = 'TR',

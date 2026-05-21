@@ -16,6 +16,7 @@ class AppState extends ChangeNotifier {
       : user = UserProfile(),
         meals = List<Meal>.from(MockData.meals),
         dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals),
+        fastingHistory = const [],
         chatMessages = [
           ChatMessage(
             role: ChatRole.assistant,
@@ -45,10 +46,13 @@ class AppState extends ChangeNotifier {
   List<Meal> meals;
   List<PlannedMeal> dailyPlan;
   ProgressSummary? progressSummary;
+  FastingSummary? fastingSummary;
+  List<FastingSession> fastingHistory;
   List<String> foodSearchHistory = const [];
   MealAnalysis? selectedAnalysis;
   List<ChatMessage> chatMessages;
   bool isLoadingProgress = false;
+  bool isLoadingFasting = false;
 
   TodayDashboard get dashboard {
     final calories = meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
@@ -73,6 +77,8 @@ class AppState extends ChangeNotifier {
   }
 
   ProgressSummary get progressSnapshot => progressSummary ?? _buildProgressSummary();
+
+  FastingSummary get fastingSnapshot => fastingSummary ?? _buildLocalFastingSummary();
 
   int get calorieTargetForProfile => switch (user.selectedGoal) {
         Goal.weightLoss => user.activityLevel == ActivityLevel.active ? 1900 : 1750,
@@ -143,6 +149,9 @@ class AppState extends ChangeNotifier {
 
     if (session != null) {
       await _hydrateAuthenticatedSession(session);
+    } else {
+      fastingSummary = _buildLocalFastingSummary();
+      fastingHistory = fastingSummary?.history ?? const [];
     }
 
     _applySessionToShell();
@@ -258,7 +267,10 @@ class AppState extends ChangeNotifier {
       meals = List<Meal>.from(MockData.meals);
       dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals);
       progressSummary = null;
+      fastingSummary = null;
+      fastingHistory = const [];
       isLoadingProgress = false;
+      isLoadingFasting = false;
       foodSearchHistory = const [];
       _applySessionToShell();
       notifyListeners();
@@ -343,6 +355,7 @@ class AppState extends ChangeNotifier {
       if (profileData is Map<String, dynamic>) {
         user = UserProfile.fromSupabase(profileData, email: user.email);
       }
+      await _refreshFastingState();
       await _refreshProgressSummary();
     }
 
@@ -640,12 +653,14 @@ class AppState extends ChangeNotifier {
         );
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
+        await _refreshFastingState();
       } else {
         meals = [
           analysis.toMeal(),
           ...meals,
         ];
         progressSummary = _buildProgressSummary();
+        fastingSummary = _buildLocalFastingSummary();
       }
       selectedAnalysis = null;
       AppAnalytics.instance.logEvent('meal_saved', parameters: {'mealType': analysis.mealType.name});
@@ -664,9 +679,11 @@ class AppState extends ChangeNotifier {
         await _service.deleteMeal(meal.id!);
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
+        await _refreshFastingState();
       } else {
         meals = [...meals]..remove(meal);
         progressSummary = _buildProgressSummary();
+        fastingSummary = _buildLocalFastingSummary();
       }
       AppAnalytics.instance.logEvent('meal_deleted');
       notifyListeners();
@@ -699,6 +716,7 @@ class AppState extends ChangeNotifier {
         await _service.updateMealItem(itemId: itemId, payload: payload);
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
+        await _refreshFastingState();
       } else {
         final ratio = item.quantity == 0 ? 1.0 : quantity / item.quantity;
         meals = meals.map((mealEntry) {
@@ -729,6 +747,7 @@ class AppState extends ChangeNotifier {
           );
         }).toList();
         progressSummary = _buildProgressSummary();
+        fastingSummary = _buildLocalFastingSummary();
       }
       AppAnalytics.instance.logEvent('meal_item_updated');
       notifyListeners();
@@ -773,6 +792,7 @@ class AppState extends ChangeNotifier {
         await _service.submitMealLog(payload: payload);
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
+        await _refreshFastingState();
       } else {
         final calories = payloadItem['calories'] as int? ?? 0;
         final proteinGr = payloadItem['proteinGr'] as int? ?? 0;
@@ -800,6 +820,7 @@ class AppState extends ChangeNotifier {
           ...meals,
         ];
         progressSummary = _buildProgressSummary();
+        fastingSummary = _buildLocalFastingSummary();
       }
 
       AppAnalytics.instance.logEvent('food_quick_add');
@@ -838,6 +859,7 @@ class AppState extends ChangeNotifier {
       ...meals,
     ];
     progressSummary = _buildProgressSummary();
+    fastingSummary = _buildLocalFastingSummary();
     AppAnalytics.instance.logEvent('quick_add');
     notifyListeners();
   }
@@ -922,9 +944,11 @@ class AppState extends ChangeNotifier {
         );
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
+        await _refreshFastingState();
       } else {
         meals = [mealModel, ...meals];
         progressSummary = _buildProgressSummary();
+        fastingSummary = _buildLocalFastingSummary();
       }
 
       dailyPlan = dailyPlan
@@ -1014,6 +1038,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> refreshProgressSummary() => _refreshProgressSummary();
 
+  Future<void> refreshFastingState() => _refreshFastingState();
+
   Future<void> _refreshProgressSummary() async {
     isLoadingProgress = true;
     notifyListeners();
@@ -1029,6 +1055,172 @@ class AppState extends ChangeNotifier {
       progressSummary = _buildProgressSummary();
     } finally {
       isLoadingProgress = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _refreshFastingState() async {
+    isLoadingFasting = true;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        final summary = await _service.getFastingCurrent();
+        fastingSummary = summary;
+        fastingHistory = summary.history;
+      } else {
+        fastingSummary = _buildLocalFastingSummary();
+        fastingHistory = fastingSummary?.history ?? const [];
+      }
+    } catch (error) {
+      AppLogger.error('Fasting refresh failed', error: error);
+      fastingSummary = _buildLocalFastingSummary();
+      fastingHistory = fastingSummary?.history ?? const [];
+    } finally {
+      isLoadingFasting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> startFastingSession() async {
+    isLoadingFasting = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        fastingSummary = await _service.startFasting();
+        fastingHistory = fastingSummary?.history ?? const [];
+      } else {
+        final plan = _defaultFastingPlanForProfile();
+        final now = DateTime.now();
+        final session = FastingSession(
+          id: now.millisecondsSinceEpoch.toString(),
+          status: FastingSessionStatus.active,
+          targetHours: plan.targetHours,
+          plannedStartAt: now.toIso8601String(),
+          plannedEndAt: now.add(Duration(hours: plan.targetHours)).toIso8601String(),
+          startedAt: now.toIso8601String(),
+          metabolicPhase: FastingPhase.earlyFast,
+          fastingWindowStart: plan.windowStart,
+          fastingWindowEnd: plan.windowEnd,
+          createdAt: now.toIso8601String(),
+          updatedAt: now.toIso8601String(),
+        );
+        fastingHistory = [session, ...fastingHistory];
+        fastingSummary = _buildLocalFastingSummary().copyWith(
+          currentSession: session,
+          history: fastingHistory,
+          currentState: FastingStateLabel.active,
+          statusLabel: 'Aktif oruç',
+          statusDetail: 'Yerel modda oturum başlatıldı.',
+          timerLabel: '00s 00dk',
+          progress: 0,
+          fastedMinutes: 0,
+          remainingMinutes: plan.targetHours * 60,
+        );
+      }
+      await _refreshProgressSummary();
+      notifyListeners();
+      return true;
+    } catch (error) {
+      errorMessage = AppErrorParser.message(error);
+      AppLogger.error('Fasting start failed', error: error);
+      notifyListeners();
+      return false;
+    } finally {
+      isLoadingFasting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> endFastingSession({
+    String? breakReason,
+  }) async {
+    isLoadingFasting = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        fastingSummary = await _service.endFasting(breakReason: breakReason);
+        fastingHistory = fastingSummary?.history ?? const [];
+      } else {
+        final summary = fastingSummary ?? _buildLocalFastingSummary();
+        final session = summary.currentSession;
+        if (session != null) {
+          final ended = session.copyWith(
+            status: breakReason == null ? FastingSessionStatus.completed : FastingSessionStatus.cancelled,
+            endedAt: DateTime.now().toIso8601String(),
+            actualDurationMinutes: session.durationMinutes,
+            breakReason: breakReason,
+            updatedAt: DateTime.now().toIso8601String(),
+            metabolicPhase: breakReason == null ? FastingPhase.recovery : FastingPhase.recovery,
+          );
+          fastingHistory = [
+            ended,
+            ...fastingHistory.where((item) => item.id != ended.id),
+          ];
+          fastingSummary = summary.copyWith(
+            currentSession: ended,
+            history: fastingHistory,
+            currentState: FastingStateLabel.completed,
+            statusLabel: breakReason == null ? 'Tamamlandı' : 'Oruç kapatıldı',
+            statusDetail: breakReason ?? 'Yerel modda oturum kapatıldı.',
+            metabolicPhase: FastingPhase.recovery,
+            metabolicPhaseLabel: FastingPhase.recovery.title,
+            metabolicPhaseDetail: 'Yeniden beslenme penceresi.',
+            timerLabel: ended.durationLabel,
+            progress: 1,
+            fastedMinutes: ended.durationMinutes,
+            remainingMinutes: 0,
+          );
+        }
+      }
+      await _refreshProgressSummary();
+      notifyListeners();
+      return true;
+    } catch (error) {
+      errorMessage = AppErrorParser.message(error);
+      AppLogger.error('Fasting end failed', error: error);
+      notifyListeners();
+      return false;
+    } finally {
+      isLoadingFasting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateFastingPlan({
+    required FastingPlan plan,
+  }) async {
+    isLoadingFasting = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        fastingSummary = await _service.updateFastingPlan(plan: plan.toMap());
+        fastingHistory = fastingSummary?.history ?? fastingHistory;
+      } else {
+        fastingSummary = (fastingSummary ?? _buildLocalFastingSummary()).copyWith(
+          plan: plan,
+          statusLabel: plan.enabled ? 'Başlamaya hazır' : 'Plan kapalı',
+          statusDetail: plan.enabled
+              ? 'Plan ${plan.label} olarak güncellendi.'
+              : 'Plan kapatıldı.',
+        );
+      }
+      await _refreshProgressSummary();
+      notifyListeners();
+      return true;
+    } catch (error) {
+      errorMessage = AppErrorParser.message(error);
+      AppLogger.error('Fasting plan update failed', error: error);
+      notifyListeners();
+      return false;
+    } finally {
+      isLoadingFasting = false;
       notifyListeners();
     }
   }
@@ -1141,6 +1333,79 @@ class AppState extends ChangeNotifier {
     );
   }
 
+  FastingSummary _buildLocalFastingSummary() {
+    final plan = _defaultFastingPlanForProfile();
+    final session = fastingSummary?.currentSession;
+    final history = fastingHistory;
+    final startedAtIso = session?.startedAt;
+    final mealsSinceStart = startedAtIso == null
+        ? 0
+        : meals.where((meal) => meal.createdAt.isAfter(DateTime.tryParse(startedAtIso) ?? meal.createdAt)).length;
+    final fastedMinutes = session?.durationMinutes ?? 0;
+    final remainingMinutes = session?.durationRemainingMinutes ?? 0;
+    final activeState = session == null
+        ? (plan.enabled ? FastingStateLabel.ready : FastingStateLabel.idle)
+        : switch (session.status) {
+            FastingSessionStatus.active => mealsSinceStart > 0 ? FastingStateLabel.broken : FastingStateLabel.active,
+            FastingSessionStatus.completed => FastingStateLabel.completed,
+            FastingSessionStatus.cancelled => FastingStateLabel.completed,
+            FastingSessionStatus.planned => FastingStateLabel.ready,
+          };
+
+    final metabolicPhase = session?.metabolicPhase ?? FastingPhase.fed;
+    final statusLabel = switch (activeState) {
+      FastingStateLabel.idle => 'Plan kapalı',
+      FastingStateLabel.ready => 'Başlamaya hazır',
+      FastingStateLabel.active => 'Aktif oruç',
+      FastingStateLabel.broken => 'Oruç bozuldu',
+      FastingStateLabel.completed => 'Son oturum tamamlandı',
+    };
+    final statusDetail = switch (activeState) {
+      FastingStateLabel.idle => 'Fasting planı kapalı; istersen buradan açabiliriz.',
+      FastingStateLabel.ready => 'Plan ${plan.label} olarak ayarlı. ${plan.windowStart} - ${plan.windowEnd} penceresi hazır.',
+      FastingStateLabel.active => 'Yerel moda göre oturum sürüyor.',
+      FastingStateLabel.broken => 'Başlangıçtan sonra öğün kaydı var.',
+      FastingStateLabel.completed => 'Son oturum tamamlandı.',
+    };
+
+    return FastingSummary(
+      plan: plan,
+      currentSession: session,
+      history: history,
+      currentState: activeState,
+      statusLabel: statusLabel,
+      statusDetail: statusDetail,
+      metabolicPhase: metabolicPhase,
+      metabolicPhaseLabel: metabolicPhase.title,
+      metabolicPhaseDetail: switch (metabolicPhase) {
+        FastingPhase.earlyFast => 'Son öğünden sonra vücut önce glikozu kullanıyor.',
+        FastingPhase.fatBurning => 'Yağ kullanımına geçiş başlıyor.',
+        FastingPhase.deepFast => 'Su ve elektrolit takibi önemli.',
+        FastingPhase.recovery => 'Yeniden beslenme penceresi.',
+        FastingPhase.fed => 'Beslenme penceresi açık.',
+      },
+      timerLabel: session?.durationLabel ?? '00s 00dk',
+      progress: session?.progress() ?? 0,
+      fastedMinutes: fastedMinutes,
+      remainingMinutes: remainingMinutes,
+      mealSinceStartCount: mealsSinceStart,
+      weeklyInsight: plan.enabled
+          ? 'Fasting plani hazir; baslatildiginda state otomatik guncellenecek.'
+          : 'Plan kapali görünüyor.',
+      achievements: history.isNotEmpty ? ['Son fasting kaydı hazır'] : ['İlk fasting oturumu için hazır'],
+      isEmpty: !plan.enabled && history.isEmpty && session == null,
+    );
+  }
+
+  FastingPlan _defaultFastingPlanForProfile() {
+    return switch (user.selectedGoal) {
+      Goal.gainMuscle => FastingPlan(enabled: true, targetHours: 14, windowStart: '21:00', windowEnd: '11:00', label: '14:10'),
+      Goal.maintain => FastingPlan(enabled: true, targetHours: 16, windowStart: '20:30', windowEnd: '12:30', label: '16:8'),
+      Goal.fasting => FastingPlan(enabled: true, targetHours: 18, windowStart: '20:00', windowEnd: '12:00', label: '18:6'),
+      Goal.weightLoss => FastingPlan(enabled: true, targetHours: 18, windowStart: '20:00', windowEnd: '12:00', label: '18:6'),
+    };
+  }
+
   int _calculateStreakDays(List<Meal> mealsForWeek) {
     final byDay = <DateTime>{};
     for (final meal in mealsForWeek) {
@@ -1251,6 +1516,7 @@ class AppState extends ChangeNotifier {
     await _refreshMealsFromBackend();
     await _refreshDailyPlanFromBackend();
     await _refreshProgressSummary();
+    await _refreshFastingState();
   }
 
   void _applySessionToShell() {

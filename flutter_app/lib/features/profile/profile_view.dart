@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_scope.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
+import '../fasting/fasting_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -51,6 +52,10 @@ class ProfileView extends StatelessWidget {
               _ActionItem(
                 title: 'Premium',
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PremiumView())),
+              ),
+              _ActionItem(
+                title: 'Fasting',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FastingView())),
               ),
               _ActionItem(
                 title: 'Çıkış yap',

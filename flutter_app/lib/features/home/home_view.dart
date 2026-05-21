@@ -5,6 +5,7 @@ import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 import '../chat/chat_view.dart';
+import '../fasting/fasting_view.dart';
 import '../meal/meal_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -134,8 +135,8 @@ class HomeView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _FastingCard(
-                progress: 0.35,
-                subtitle: '14s 20dk kaldı',
+                summary: state.fastingSnapshot,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FastingView())),
               ),
               const SizedBox(height: 18),
               _NuriCard(
@@ -639,58 +640,83 @@ class _GoalMiniCard extends StatelessWidget {
 
 class _FastingCard extends StatelessWidget {
   const _FastingCard({
-    required this.progress,
-    required this.subtitle,
+    required this.summary,
+    required this.onTap,
   });
 
-  final double progress;
-  final String subtitle;
+  final FastingSummary summary;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(color: const Color(0xFFEDE7FF), shape: BoxShape.circle),
-                child: const Icon(Icons.timelapse_outlined, color: Color(0xFF9B59B6)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Fasting', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 4),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-                  ],
+    final active = summary.currentState == FastingStateLabel.active;
+    final broken = summary.currentState == FastingStateLabel.broken;
+    final tint = broken
+        ? const Color(0x1FECA4A4)
+        : active
+            ? const Color(0xFFDCEFD8)
+            : const Color(0xFFF4F1EE);
+    final accent = broken ? NutriColors.coral : active ? NutriColors.leaf : NutriColors.muted;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+                  child: Icon(
+                    active ? Icons.timelapse_outlined : broken ? Icons.warning_amber_outlined : Icons.nightlight_outlined,
+                    color: accent,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              color: const Color(0xFFB794FF),
-              backgroundColor: const Color(0xFFE4E0DC),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Fasting', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Text(summary.statusLabel, style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                Text(
+                  summary.timerLabel,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: accent),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(summary.statusDetail, style: Theme.of(context).textTheme.bodySmall),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: summary.progress,
+                minHeight: 8,
+                color: accent,
+                backgroundColor: const Color(0xFFE4E0DC),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
