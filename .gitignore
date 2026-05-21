@@ -2,6 +2,9 @@
 .env.*
 supabase/functions/.env
 supabase/functions/.env.*
+.venv/
+__pycache__/
+*.py[cod]
 .DS_Store
 DerivedData/
 *.xcuserdata/

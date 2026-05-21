@@ -44,9 +44,11 @@ class AppState extends ChangeNotifier {
   UserProfile user;
   List<Meal> meals;
   List<PlannedMeal> dailyPlan;
+  ProgressSummary? progressSummary;
   List<String> foodSearchHistory = const [];
   MealAnalysis? selectedAnalysis;
   List<ChatMessage> chatMessages;
+  bool isLoadingProgress = false;
 
   TodayDashboard get dashboard {
     final calories = meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
@@ -69,6 +71,8 @@ class AppState extends ChangeNotifier {
       hydrationTarget: 8,
     );
   }
+
+  ProgressSummary get progressSnapshot => progressSummary ?? _buildProgressSummary();
 
   int get calorieTargetForProfile => switch (user.selectedGoal) {
         Goal.weightLoss => user.activityLevel == ActivityLevel.active ? 1900 : 1750,
@@ -253,6 +257,8 @@ class AppState extends ChangeNotifier {
       mainTabIndex = 0;
       meals = List<Meal>.from(MockData.meals);
       dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals);
+      progressSummary = null;
+      isLoadingProgress = false;
       foodSearchHistory = const [];
       _applySessionToShell();
       notifyListeners();
@@ -337,6 +343,7 @@ class AppState extends ChangeNotifier {
       if (profileData is Map<String, dynamic>) {
         user = UserProfile.fromSupabase(profileData, email: user.email);
       }
+      await _refreshProgressSummary();
     }
 
     _applySessionToShell();
@@ -632,11 +639,13 @@ class AppState extends ChangeNotifier {
           },
         );
         await _refreshMealsFromBackend();
+        await _refreshProgressSummary();
       } else {
         meals = [
           analysis.toMeal(),
           ...meals,
         ];
+        progressSummary = _buildProgressSummary();
       }
       selectedAnalysis = null;
       AppAnalytics.instance.logEvent('meal_saved', parameters: {'mealType': analysis.mealType.name});
@@ -654,8 +663,10 @@ class AppState extends ChangeNotifier {
       if (isAuthenticated && accessToken != null && meal.id != null && meal.id!.isNotEmpty) {
         await _service.deleteMeal(meal.id!);
         await _refreshMealsFromBackend();
+        await _refreshProgressSummary();
       } else {
         meals = [...meals]..remove(meal);
+        progressSummary = _buildProgressSummary();
       }
       AppAnalytics.instance.logEvent('meal_deleted');
       notifyListeners();
@@ -687,6 +698,7 @@ class AppState extends ChangeNotifier {
         };
         await _service.updateMealItem(itemId: itemId, payload: payload);
         await _refreshMealsFromBackend();
+        await _refreshProgressSummary();
       } else {
         final ratio = item.quantity == 0 ? 1.0 : quantity / item.quantity;
         meals = meals.map((mealEntry) {
@@ -716,6 +728,7 @@ class AppState extends ChangeNotifier {
             items: updatedItems,
           );
         }).toList();
+        progressSummary = _buildProgressSummary();
       }
       AppAnalytics.instance.logEvent('meal_item_updated');
       notifyListeners();
@@ -759,6 +772,7 @@ class AppState extends ChangeNotifier {
       if (isAuthenticated && accessToken != null) {
         await _service.submitMealLog(payload: payload);
         await _refreshMealsFromBackend();
+        await _refreshProgressSummary();
       } else {
         final calories = payloadItem['calories'] as int? ?? 0;
         final proteinGr = payloadItem['proteinGr'] as int? ?? 0;
@@ -785,6 +799,7 @@ class AppState extends ChangeNotifier {
           ),
           ...meals,
         ];
+        progressSummary = _buildProgressSummary();
       }
 
       AppAnalytics.instance.logEvent('food_quick_add');
@@ -822,6 +837,7 @@ class AppState extends ChangeNotifier {
       ),
       ...meals,
     ];
+    progressSummary = _buildProgressSummary();
     AppAnalytics.instance.logEvent('quick_add');
     notifyListeners();
   }
@@ -905,8 +921,10 @@ class AppState extends ChangeNotifier {
           },
         );
         await _refreshMealsFromBackend();
+        await _refreshProgressSummary();
       } else {
         meals = [mealModel, ...meals];
+        progressSummary = _buildProgressSummary();
       }
 
       dailyPlan = dailyPlan
@@ -994,10 +1012,245 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> refreshProgressSummary() => _refreshProgressSummary();
+
+  Future<void> _refreshProgressSummary() async {
+    isLoadingProgress = true;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        progressSummary = await _service.getProgressSummary();
+      } else {
+        progressSummary = _buildProgressSummary();
+      }
+    } catch (error) {
+      AppLogger.error('Progress refresh failed', error: error);
+      progressSummary = _buildProgressSummary();
+    } finally {
+      isLoadingProgress = false;
+      notifyListeners();
+    }
+  }
+
+  ProgressSummary _buildProgressSummary() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart = today.subtract(const Duration(days: 6));
+    final weeklyMeals = meals.where((meal) {
+      final logged = meal.createdAt;
+      final day = DateTime(logged.year, logged.month, logged.day);
+      return !day.isBefore(weekStart) && !day.isAfter(today);
+    }).toList();
+
+    final caloriesByDay = <DateTime, int>{};
+    final macrosByDay = <DateTime, MacroTargets>{};
+
+    for (final meal in weeklyMeals) {
+      final logged = meal.createdAt;
+      final day = DateTime(logged.year, logged.month, logged.day);
+      caloriesByDay[day] = (caloriesByDay[day] ?? 0) + meal.totalCalories;
+      final currentMacros = macrosByDay[day] ?? MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0);
+      macrosByDay[day] = MacroTargets(
+        proteinGr: currentMacros.proteinGr + meal.macros.proteinGr,
+        carbsGr: currentMacros.carbsGr + meal.macros.carbsGr,
+        fatGr: currentMacros.fatGr + meal.macros.fatGr,
+      );
+    }
+
+    final dailyTarget = calorieTargetForProfile;
+    final weeklyTarget = dailyTarget * 7;
+    final weeklyConsumed = caloriesByDay.values.fold<int>(0, (sum, value) => sum + value);
+    final weeklyBalance = weeklyTarget - weeklyConsumed;
+    final macros = weeklyMeals.fold<MacroTargets>(
+      MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0),
+      (partial, meal) => MacroTargets(
+        proteinGr: partial.proteinGr + meal.macros.proteinGr,
+        carbsGr: partial.carbsGr + meal.macros.carbsGr,
+        fatGr: partial.fatGr + meal.macros.fatGr,
+      ),
+    );
+    final weightKg = user.weightKg.toDouble();
+    final targetWeightKg = (user.targetWeightKg ?? user.weightKg).toDouble();
+    final estimatedDeltaKg = weeklyBalance / 7700.0;
+    final startingWeight = weightKg - estimatedDeltaKg;
+
+    final trend = List<ProgressTrendPoint>.generate(7, (index) {
+      final day = weekStart.add(Duration(days: index));
+      final balanceToDay = caloriesByDay.entries
+          .where((entry) => !entry.key.isAfter(day))
+          .fold<int>(0, (sum, entry) => sum + (dailyTarget - entry.value));
+      final projectedWeight = startingWeight + (balanceToDay / 7700.0);
+      return ProgressTrendPoint(
+        date: day,
+        weightKg: projectedWeight,
+        caloriesConsumed: caloriesByDay[day] ?? 0,
+        calorieTarget: dailyTarget,
+      );
+    });
+
+    final streakDays = _calculateStreakDays(weeklyMeals);
+    final hydrationTarget = 8;
+    final hydrationCurrent = _estimateHydration(currentMeals: weeklyMeals.length, streakDays: streakDays);
+    final stepsTarget = _stepsTargetForProfile;
+    final stepsCurrent = _estimateSteps(
+      meals: weeklyMeals.length,
+      calorieAverage: weeklyConsumed / 7.0,
+      streakDays: streakDays,
+    );
+    final achievements = _buildAchievements(
+      streakDays: streakDays,
+      consumedMacros: macros,
+      macroTargets: macroTargetsForProfile,
+      calorieBalance: weeklyBalance,
+    );
+
+    return ProgressSummary(
+      weekStart: weekStart,
+      weekEnd: today,
+      calorieTarget: weeklyTarget,
+      consumedCalories: weeklyConsumed,
+      calorieBalance: weeklyBalance,
+      macroTargets: MacroTargets(
+        proteinGr: macroTargetsForProfile.proteinGr * 7,
+        carbsGr: macroTargetsForProfile.carbsGr * 7,
+        fatGr: macroTargetsForProfile.fatGr * 7,
+      ),
+      consumedMacros: macros,
+      currentWeightKg: weightKg,
+      targetWeightKg: targetWeightKg,
+      estimatedWeightDeltaKg: estimatedDeltaKg,
+      streakDays: streakDays,
+      hydrationCurrent: hydrationCurrent,
+      hydrationTarget: hydrationTarget,
+      stepsCurrent: stepsCurrent,
+      stepsTarget: stepsTarget,
+      mealCount: weeklyMeals.length,
+      weightTrend: trend,
+      achievements: achievements,
+      weeklyInsight: _buildWeeklyInsight(
+        weeklyConsumed: weeklyConsumed,
+        weeklyTarget: weeklyTarget,
+        consumedMacros: macros,
+        macroTargets: macroTargetsForProfile,
+        streakDays: streakDays,
+        estimatedDeltaKg: estimatedDeltaKg,
+      ),
+      isEmpty: weeklyMeals.isEmpty,
+      source: isAuthenticated ? 'backend-calculated' : 'local-calculated',
+    );
+  }
+
+  int _calculateStreakDays(List<Meal> mealsForWeek) {
+    final byDay = <DateTime>{};
+    for (final meal in mealsForWeek) {
+      final created = meal.createdAt;
+      byDay.add(DateTime(created.year, created.month, created.day));
+    }
+
+    int streak = 0;
+    final today = DateTime.now();
+    for (int offset = 0; offset < 30; offset++) {
+      final day = DateTime(today.year, today.month, today.day).subtract(Duration(days: offset));
+      if (!byDay.contains(day)) break;
+      streak += 1;
+    }
+
+    return streak;
+  }
+
+  int _estimateHydration({
+    required int currentMeals,
+    required int streakDays,
+  }) {
+    final estimated = 3 + currentMeals + (streakDays ~/ 2);
+    return estimated.clamp(3, 8);
+  }
+
+  int get _stepsTargetForProfile => switch (user.activityLevel) {
+        ActivityLevel.sedentary => 6000,
+        ActivityLevel.light => 7500,
+        ActivityLevel.moderate => 9000,
+        ActivityLevel.active => 10500,
+      };
+
+  int _estimateSteps({
+    required int meals,
+    required double calorieAverage,
+    required int streakDays,
+  }) {
+    final baseline = switch (user.activityLevel) {
+      ActivityLevel.sedentary => 4200,
+      ActivityLevel.light => 5600,
+      ActivityLevel.moderate => 6800,
+      ActivityLevel.active => 8200,
+    };
+    final mealBoost = meals * 350;
+    final streakBoost = streakDays * 120;
+    final calorieBoost = (calorieAverage / 2).round();
+    final value = baseline + mealBoost + streakBoost + calorieBoost;
+    return value.clamp(3000, _stepsTargetForProfile + 1800);
+  }
+
+  List<String> _buildAchievements({
+    required int streakDays,
+    required MacroTargets consumedMacros,
+    required MacroTargets macroTargets,
+    required int calorieBalance,
+  }) {
+    final achievements = <String>[];
+
+    if (streakDays >= 3) {
+      achievements.add('$streakDays gunluk kayit serisi');
+    }
+
+    final proteinRatio = macroTargets.proteinGr == 0 ? 0.0 : consumedMacros.proteinGr / macroTargets.proteinGr;
+    if (proteinRatio >= 0.8) {
+      achievements.add('Protein hedefinin %80+ seviyesine ulastin');
+    }
+
+    if (calorieBalance.abs() <= 250) {
+      achievements.add('Kalori dengesi hedefe yakin');
+    }
+
+    if (achievements.isEmpty) {
+      achievements.add('Bu hafta yeni bir hedef yakalamak icin iyi bir baslangic var');
+    }
+
+    return achievements;
+  }
+
+  String _buildWeeklyInsight({
+    required int weeklyConsumed,
+    required int weeklyTarget,
+    required MacroTargets consumedMacros,
+    required MacroTargets macroTargets,
+    required int streakDays,
+    required double estimatedDeltaKg,
+  }) {
+    final caloriesGap = weeklyTarget - weeklyConsumed;
+    final proteinRatio = macroTargets.proteinGr == 0 ? 0.0 : consumedMacros.proteinGr / macroTargets.proteinGr;
+    final calorieLine = caloriesGap >= 0
+        ? 'Bu hafta kalori dengesi hedefe yakin; yaklasik ${caloriesGap ~/ 7} kcal gunluk acik var.'
+        : 'Bu hafta hedefin uzerine cikilmis; gunluk ortalama ${(-caloriesGap) ~/ 7} kcal fazla gorunuyor.';
+    final proteinLine = proteinRatio >= 0.8
+        ? 'Protein tarafi guclu ilerliyor.'
+        : 'Protein miktarini biraz artirmak hedefe daha hizli yaklastirir.';
+    final streakLine = streakDays >= 3
+        ? 'Serin tutarlı gidiyor.'
+        : 'Bir kac gunluk düzenli kayıt, trendi daha net hale getirir.';
+    final weightLine = estimatedDeltaKg >= 0
+        ? 'Mevcut gidişat tahmini olarak ${estimatedDeltaKg.toStringAsFixed(1)} kg kayip potansiyeli gosteriyor.'
+        : 'Mevcut gidişat tahmini olarak ${estimatedDeltaKg.abs().toStringAsFixed(1)} kg artis tarafinda.';
+
+    return '$calorieLine $proteinLine $streakLine $weightLine';
+  }
+
   Future<void> _hydrateAuthenticatedSession(Session session) async {
     await _syncProfileFromSession(session);
     await _refreshMealsFromBackend();
     await _refreshDailyPlanFromBackend();
+    await _refreshProgressSummary();
   }
 
   void _applySessionToShell() {

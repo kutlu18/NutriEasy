@@ -250,6 +250,51 @@ class NutriSupabaseService {
     return _asMap(response.data);
   }
 
+  Future<ProgressSummary> getProgressSummary() async {
+    final response = await client.functions.invoke(
+      'progress-summary',
+      method: HttpMethod.get,
+      headers: _authHeaders,
+    );
+
+    final data = _asMap(response.data);
+    final summary = data['summary'];
+    if (summary is Map<String, dynamic>) {
+      return ProgressSummary.fromMap(summary);
+    }
+    return ProgressSummary.fromMap(data);
+  }
+
+  Future<Map<String, dynamic>> getProgressMetric({
+    required String metric,
+  }) async {
+    final response = await client.functions.invoke(
+      'progress-metric',
+      method: HttpMethod.get,
+      queryParameters: {'metric': metric},
+      headers: _authHeaders,
+    );
+    return _asMap(response.data);
+  }
+
+  Future<Map<String, dynamic>> getHydrationStatus() async {
+    final response = await client.functions.invoke(
+      'progress-hydration',
+      method: HttpMethod.get,
+      headers: _authHeaders,
+    );
+    return _asMap(response.data);
+  }
+
+  Future<Map<String, dynamic>> getStepsStatus() async {
+    final response = await client.functions.invoke(
+      'progress-steps',
+      method: HttpMethod.get,
+      headers: _authHeaders,
+    );
+    return _asMap(response.data);
+  }
+
   Future<List<FoodSearchResult>> searchFoods({
     required String query,
     String region = 'TR',
