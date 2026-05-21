@@ -1,0 +1,19 @@
+name: NutriEasy
+options:
+  bundleIdPrefix: com.nutrieasy
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  NutriEasy:
+    type: application
+    platform: iOS
+    sources:
+      - NutriEasyApp
+    settings:
+      base:
+        INFOPLIST_FILE: NutriEasyApp/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.nutrieasy.app
+        MARKETING_VERSION: 0.1.0
+        CURRENT_PROJECT_VERSION: 1
+        SWIFT_VERSION: 5.9
+        TARGETED_DEVICE_FAMILY: "1"

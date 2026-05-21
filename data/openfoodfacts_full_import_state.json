@@ -1,0 +1,13 @@
+{
+  "batches": 108,
+  "completed": false,
+  "failed": 0,
+  "imported": 100116,
+  "last_flushed_scanned": 479674,
+  "resume_after_scanned": 479674,
+  "scanned": 479674,
+  "skipped_existing": 7884,
+  "started_at": "2026-05-18T12:12:45Z",
+  "updated_at": "2026-05-18T12:32:35Z",
+  "valid": 108000
+}

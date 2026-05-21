@@ -1,0 +1,18 @@
+alter table public.foods
+  add column if not exists labels text,
+  add column if not exists labels_tags text[],
+  add column if not exists traces text,
+  add column if not exists traces_tags text[],
+  add column if not exists origins text,
+  add column if not exists origins_tags text[],
+  add column if not exists manufacturing_places text,
+  add column if not exists stores text,
+  add column if not exists source_creator text,
+  add column if not exists source_created_t bigint,
+  add column if not exists source_last_modified_t bigint,
+  add column if not exists ecoscore_score int,
+  add column if not exists ecoscore_grade text,
+  add column if not exists food_groups text,
+  add column if not exists food_groups_tags text[],
+  add column if not exists pnns_groups_1 text,
+  add column if not exists pnns_groups_2 text;

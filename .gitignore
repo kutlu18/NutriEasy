@@ -1,0 +1,8 @@
+.env
+.env.*
+supabase/functions/.env
+supabase/functions/.env.*
+.DS_Store
+DerivedData/
+*.xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
