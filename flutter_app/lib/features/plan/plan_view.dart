@@ -6,6 +6,7 @@ import '../../app/app_scope.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
+import '../premium/premium_view.dart' as premium;
 
 class DailyPlanView extends StatelessWidget {
   const DailyPlanView({super.key});
@@ -18,7 +19,8 @@ class DailyPlanView extends StatelessWidget {
       animation: state,
       builder: (context, _) {
         final plan = state.dailyPlan;
-        final totalCalories = plan.fold<int>(0, (sum, item) => sum + item.calories);
+        final totalCalories =
+            plan.fold<int>(0, (sum, item) => sum + item.calories);
         final appliedCount = plan.where((item) => item.isApplied).length;
 
         return Scaffold(
@@ -36,11 +38,15 @@ class DailyPlanView extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              Text('Bugunun rehberi', style: Theme.of(context).textTheme.headlineLarge),
+              Text('Bugunun rehberi',
+                  style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
                 'Plan, sadece bir liste degil. Bugun ne yiyecegini sade bir akista gosterir.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: NutriColors.muted),
               ),
               const SizedBox(height: 16),
               _DailySummaryCard(
@@ -49,6 +55,24 @@ class DailyPlanView extends StatelessWidget {
                 appliedCount: appliedCount,
                 totalCount: plan.length,
               ),
+              const SizedBox(height: 18),
+              if (state.canAccessWeeklyPlan)
+                _WeeklyPlanPreviewCard(plan: plan)
+              else
+                _PremiumGateCard(
+                  title: 'Haftalik plan',
+                  subtitle:
+                      'Premium ile haftanin akisini tek yerde gorebilirsin.',
+                  benefits: const [
+                    '7 gunluk rehber akis',
+                    'Ogun siralama optimizasyonu',
+                    'Akilli alternatifler',
+                  ],
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const premium.PremiumView()),
+                  ),
+                ),
               const SizedBox(height: 18),
               SectionHeader(
                 title: 'Ogun kartlari',
@@ -64,14 +88,16 @@ class DailyPlanView extends StatelessWidget {
                   child: _PlanMealCard(
                     meal: meal,
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => RecipeDetailView(meal: meal)),
+                      MaterialPageRoute(
+                          builder: (_) => RecipeDetailView(meal: meal)),
                     ),
                     onApply: () async {
                       await state.applyPlannedMeal(meal);
                     },
                     onAlternative: () => showAlternativeSheet(context, meal),
                     onEdit: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => PlanEditView(meal: meal)),
+                      MaterialPageRoute(
+                          builder: (_) => PlanEditView(meal: meal)),
                     ),
                   ),
                 ),
@@ -84,7 +110,8 @@ class DailyPlanView extends StatelessWidget {
   }
 }
 
-Future<void> showAlternativeSheet(BuildContext context, PlannedMeal meal) async {
+Future<void> showAlternativeSheet(
+    BuildContext context, PlannedMeal meal) async {
   final state = AppScope.of(context);
   final alternatives = meal.alternatives;
 
@@ -115,17 +142,22 @@ Future<void> showAlternativeSheet(BuildContext context, PlannedMeal meal) async 
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Alternatif oneriler', style: Theme.of(context).textTheme.titleLarge),
+              Text('Alternatif oneriler',
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(
                 'Ayni ogun slotu icin hafif farkli secenekler.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: NutriColors.muted),
               ),
               const SizedBox(height: 16),
               if (alternatives.isEmpty)
                 const EmptyState(
                   title: 'Alternatif yok',
-                  subtitle: 'Bu kart icin simdilik baska bir secenek bulunmuyor.',
+                  subtitle:
+                      'Bu kart icin simdilik baska bir secenek bulunmuyor.',
                   icon: Icons.swap_horiz,
                 )
               else
@@ -187,7 +219,8 @@ class _PlanEditViewState extends State<PlanEditView> {
         padding: const EdgeInsets.all(20),
         children: [
           if (widget.meal != null) ...[
-            Text('Kart detayini duzenle', style: Theme.of(context).textTheme.headlineLarge),
+            Text('Kart detayini duzenle',
+                style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 8),
             TextField(
               controller: _titleController,
@@ -220,19 +253,27 @@ class _PlanEditViewState extends State<PlanEditView> {
               icon: Icons.save_outlined,
               onPressed: () {
                 final updated = widget.meal!.copyWith(
-                  title: _titleController.text.trim().isEmpty ? widget.meal!.title : _titleController.text.trim(),
-                  note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+                  title: _titleController.text.trim().isEmpty
+                      ? widget.meal!.title
+                      : _titleController.text.trim(),
+                  note: _noteController.text.trim().isEmpty
+                      ? null
+                      : _noteController.text.trim(),
                 );
                 state.editPlannedMeal(widget.meal!, updated);
                 Navigator.of(context).pop();
               },
             ),
           ] else ...[
-            Text('Gunluk plan kartlari', style: Theme.of(context).textTheme.headlineLarge),
+            Text('Gunluk plan kartlari',
+                style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 8),
             Text(
               'Her karti acip basligini veya alternatifini degistirebilirsin.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: NutriColors.muted),
             ),
             const SizedBox(height: 16),
             ...meals.map(
@@ -241,7 +282,8 @@ class _PlanEditViewState extends State<PlanEditView> {
                 child: _EditablePlanCard(
                   meal: meal,
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => PlanEditView(meal: meal)));
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => PlanEditView(meal: meal)));
                   },
                 ),
               ),
@@ -268,7 +310,11 @@ class RecipeDetailView extends StatelessWidget {
         children: [
           Text(meal.title, style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 8),
-          Text(meal.description, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted)),
+          Text(meal.description,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: NutriColors.muted)),
           const SizedBox(height: 16),
           _RecipeMetaGrid(meal: meal),
           const SizedBox(height: 16),
@@ -287,7 +333,8 @@ class RecipeDetailView extends StatelessWidget {
             (ingredient) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InlineMessage(
-                text: '${ingredient.amount} ${ingredient.unit} ${ingredient.name}',
+                text:
+                    '${ingredient.amount} ${ingredient.unit} ${ingredient.name}',
                 icon: Icons.check_circle_outline,
                 backgroundColor: const Color(0x14D0EBD6),
                 foregroundColor: NutriColors.ink,
@@ -298,14 +345,14 @@ class RecipeDetailView extends StatelessWidget {
           SectionHeader(title: 'Yapilis'),
           const SizedBox(height: 10),
           ...meal.steps.asMap().entries.map(
-            (entry) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _StepCard(
-                index: entry.key + 1,
-                text: entry.value,
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _StepCard(
+                    index: entry.key + 1,
+                    text: entry.value,
+                  ),
+                ),
               ),
-            ),
-          ),
         ],
       ),
     );
@@ -343,7 +390,11 @@ class _DailySummaryCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Bugun', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.leaf)),
+                  Text('Bugun',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: NutriColors.leaf)),
                   const SizedBox(height: 4),
                   Text(
                     '$totalCalories / $targetCalories kcal',
@@ -399,7 +450,8 @@ class _PlanMealCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Column(
@@ -411,7 +463,9 @@ class _PlanMealCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: meal.isApplied ? const Color(0xFFDDEFE6) : const Color(0xFFF1F0ED),
+                    color: meal.isApplied
+                        ? const Color(0xFFDDEFE6)
+                        : const Color(0xFFF1F0ED),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(_mealIcon(meal.mealType), color: statusColor),
@@ -421,13 +475,22 @@ class _PlanMealCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(meal.mealType.title, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: statusColor)),
+                      Text(meal.mealType.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: statusColor)),
                       const SizedBox(height: 4),
-                      Text(meal.title, style: Theme.of(context).textTheme.titleMedium),
+                      Text(meal.title,
+                          style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
                 ),
-                Text('${meal.calories} kcal', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: statusColor)),
+                Text('${meal.calories} kcal',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(color: statusColor)),
               ],
             ),
             const SizedBox(height: 12),
@@ -453,9 +516,12 @@ class _PlanMealCard extends StatelessWidget {
                 Expanded(
                   child: PrimaryButton(
                     title: meal.isApplied ? 'Uygulandi' : 'Plani uygula',
-                    icon: meal.isApplied ? Icons.check_circle_outline : Icons.play_arrow_outlined,
+                    icon: meal.isApplied
+                        ? Icons.check_circle_outline
+                        : Icons.play_arrow_outlined,
                     isBusy: false,
-                    onPressed: meal.isApplied ? null : () => unawaited(onApply()),
+                    onPressed:
+                        meal.isApplied ? null : () => unawaited(onApply()),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -507,7 +573,8 @@ class _AlternativeCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Row(
@@ -526,13 +593,19 @@ class _AlternativeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(meal.title,
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(meal.description, style: Theme.of(context).textTheme.bodySmall),
+                  Text(meal.description,
+                      style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
-            Text('${meal.calories} kcal', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: NutriColors.leaf)),
+            Text('${meal.calories} kcal',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: NutriColors.leaf)),
           ],
         ),
       ),
@@ -576,9 +649,11 @@ class _EditablePlanCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(meal.title,
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(meal.description, style: Theme.of(context).textTheme.bodySmall),
+                  Text(meal.description,
+                      style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
@@ -599,9 +674,19 @@ class _RecipeMetaGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: MetricCard(title: 'Süre', value: '${meal.totalMinutes} dk', subtitle: 'Hazırlık + pişirme', tint: NutriColors.mint)),
+        Expanded(
+            child: MetricCard(
+                title: 'Süre',
+                value: '${meal.totalMinutes} dk',
+                subtitle: 'Hazırlık + pişirme',
+                tint: NutriColors.mint)),
         const SizedBox(width: 10),
-        Expanded(child: MetricCard(title: 'Porsiyon', value: '${meal.servings}', subtitle: 'Kişilik', tint: const Color(0xFFEDE7FF))),
+        Expanded(
+            child: MetricCard(
+                title: 'Porsiyon',
+                value: '${meal.servings}',
+                subtitle: 'Kişilik',
+                tint: const Color(0xFFEDE7FF))),
       ],
     );
   }
@@ -676,11 +761,16 @@ class _StepCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(99),
             ),
             child: Center(
-              child: Text('$index', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: NutriColors.leaf)),
+              child: Text('$index',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: NutriColors.leaf)),
             ),
           ),
           const SizedBox(width: 12),
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+              child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
         ],
       ),
     );
@@ -724,6 +814,107 @@ class _Pill extends StatelessWidget {
               color: NutriColors.leaf,
               fontWeight: FontWeight.w700,
             ),
+      ),
+    );
+  }
+}
+
+class _WeeklyPlanPreviewCard extends StatelessWidget {
+  const _WeeklyPlanPreviewCard({required this.plan});
+
+  final List<PlannedMeal> plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = plan.take(3).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDFF0E6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Haftalik plan hazir',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(
+            'Bu hafta icin onerilen akis, ogunleri tek bakista toparlar.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          ...preview.map(
+            (meal) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline,
+                      color: NutriColors.leaf, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(meal.title)),
+                  Text('${meal.calories} kcal'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PremiumGateCard extends StatelessWidget {
+  const _PremiumGateCard({
+    required this.title,
+    required this.subtitle,
+    required this.benefits,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<String> benefits;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F1EE),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 12),
+          ...benefits.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_outline,
+                      color: NutriColors.leaf, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(item)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          PrimaryButton(
+            title: 'Premium ac',
+            icon: Icons.workspace_premium_outlined,
+            onPressed: onPressed,
+          ),
+        ],
       ),
     );
   }

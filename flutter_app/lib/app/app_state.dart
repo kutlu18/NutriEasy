@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -22,7 +23,8 @@ class AppState extends ChangeNotifier {
         chatMessages = [
           ChatMessage(
             role: ChatRole.assistant,
-            text: 'Merhaba, ben Nuri. Bugunku hedeflerine gore ogun kararlarinda yardimci olabilirim.',
+            text:
+                'Merhaba, ben Nuri. Bugunku hedeflerine gore ogun kararlarinda yardimci olabilirim.',
           ),
         ];
 
@@ -52,6 +54,7 @@ class AppState extends ChangeNotifier {
   List<FastingSession> fastingHistory;
   List<String> foodSearchHistory = const [];
   NotificationPreferences notificationPreferences = NotificationPreferences();
+  SubscriptionState subscriptionState = SubscriptionState();
   ChatThread? chatThread;
   List<ChatSuggestionChip> chatSuggestionChips;
   List<ChatRecipeCard> chatRecipeCards;
@@ -63,7 +66,8 @@ class AppState extends ChangeNotifier {
   bool isSendingChat = false;
 
   TodayDashboard get dashboard {
-    final calories = meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
+    final calories =
+        meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
     final macros = meals.fold<MacroTargets>(
       MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0),
       (partial, meal) => MacroTargets(
@@ -84,23 +88,44 @@ class AppState extends ChangeNotifier {
     );
   }
 
-  ProgressSummary get progressSnapshot => progressSummary ?? _buildProgressSummary();
+  ProgressSummary get progressSnapshot =>
+      progressSummary ?? _buildProgressSummary();
 
-  FastingSummary get fastingSnapshot => fastingSummary ?? _buildLocalFastingSummary();
+  FastingSummary get fastingSnapshot =>
+      fastingSummary ?? _buildLocalFastingSummary();
 
   int get calorieTargetForProfile => switch (user.selectedGoal) {
-        Goal.weightLoss => user.activityLevel == ActivityLevel.active ? 1900 : 1750,
-        Goal.gainMuscle => user.activityLevel == ActivityLevel.active ? 2450 : 2250,
-        Goal.maintain => user.activityLevel == ActivityLevel.active ? 2200 : 2000,
+        Goal.weightLoss =>
+          user.activityLevel == ActivityLevel.active ? 1900 : 1750,
+        Goal.gainMuscle =>
+          user.activityLevel == ActivityLevel.active ? 2450 : 2250,
+        Goal.maintain =>
+          user.activityLevel == ActivityLevel.active ? 2200 : 2000,
         Goal.fasting => 1700,
       };
 
   MacroTargets get macroTargetsForProfile => switch (user.selectedGoal) {
-        Goal.weightLoss => MacroTargets(proteinGr: 130, carbsGr: 150, fatGr: 55),
-        Goal.gainMuscle => MacroTargets(proteinGr: 160, carbsGr: 220, fatGr: 70),
+        Goal.weightLoss =>
+          MacroTargets(proteinGr: 130, carbsGr: 150, fatGr: 55),
+        Goal.gainMuscle =>
+          MacroTargets(proteinGr: 160, carbsGr: 220, fatGr: 70),
         Goal.maintain => MacroTargets(proteinGr: 125, carbsGr: 190, fatGr: 65),
         Goal.fasting => MacroTargets(proteinGr: 120, carbsGr: 140, fatGr: 60),
       };
+
+  bool get isPremiumUser => subscriptionState.active;
+
+  bool get canAccessWeeklyPlan => subscriptionState.hasWeeklyPlanAccess;
+
+  bool get canAccessAdvancedInsights =>
+      subscriptionState.hasAdvancedInsightAccess;
+
+  bool get canAccessDeepAi => subscriptionState.hasDeepAiAccess;
+
+  bool get canAccessAdFreeExperience => subscriptionState.hasAdFreeAccess;
+
+  bool get canAccessSmarterAlternatives =>
+      subscriptionState.hasSmarterAlternativesAccess;
 
   void initialize() {
     if (_initialized) return;
@@ -109,7 +134,8 @@ class AppState extends ChangeNotifier {
     final session = Supabase.instance.client.auth.currentSession;
     accessToken = session?.accessToken;
     isAuthenticated = session != null;
-    AppAnalytics.instance.logEvent('app_initialize', parameters: {'hasSession': session != null});
+    AppAnalytics.instance.logEvent('app_initialize',
+        parameters: {'hasSession': session != null});
 
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
       (data) {
@@ -124,17 +150,21 @@ class AppState extends ChangeNotifier {
         } else if (data.event == AuthChangeEvent.passwordRecovery) {
           errorMessage = null;
           _setShellState(ShellState.resetPassword);
-        } else if (data.session != null && data.event == AuthChangeEvent.signedIn) {
+        } else if (data.session != null &&
+            data.event == AuthChangeEvent.signedIn) {
           unawaited(_hydrateAuthenticatedSession(data.session!));
-        } else if (data.session != null && data.event == AuthChangeEvent.tokenRefreshed) {
+        } else if (data.session != null &&
+            data.event == AuthChangeEvent.tokenRefreshed) {
           unawaited(_hydrateAuthenticatedSession(data.session!));
         }
 
         notifyListeners();
       },
       onError: (error, stackTrace) {
-        errorMessage = 'Oturum durumu guncellenemedi: ${AppErrorParser.message(error)}';
-        AppLogger.error('Auth state listener failed', error: error, stackTrace: stackTrace);
+        errorMessage =
+            'Oturum durumu guncellenemedi: ${AppErrorParser.message(error)}';
+        AppLogger.error('Auth state listener failed',
+            error: error, stackTrace: stackTrace);
         notifyListeners();
       },
     );
@@ -155,6 +185,7 @@ class AppState extends ChangeNotifier {
       fastingNotifications: _storage!.fastingNotificationsEnabled,
       dailySummary: _storage!.dailySummaryEnabled,
     );
+    subscriptionState = _loadPremiumSubscriptionState();
 
     await Future<void>.delayed(const Duration(milliseconds: 650));
 
@@ -185,7 +216,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _service.signInWithPassword(email: email, password: password);
+      final response =
+          await _service.signInWithPassword(email: email, password: password);
       accessToken = response.session?.accessToken;
       isAuthenticated = response.session != null;
       if (response.session != null) {
@@ -346,7 +378,8 @@ class AppState extends ChangeNotifier {
 
     final nextHistory = <String>[
       cleaned,
-      ...foodSearchHistory.where((item) => item.toLowerCase() != cleaned.toLowerCase()),
+      ...foodSearchHistory
+          .where((item) => item.toLowerCase() != cleaned.toLowerCase()),
     ].take(8).toList();
 
     foodSearchHistory = nextHistory;
@@ -380,25 +413,61 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateNotificationPreferences(NotificationPreferences preferences) async {
+  Future<void> updateNotificationPreferences(
+      NotificationPreferences preferences) async {
     notificationPreferences = preferences;
     if (_storage != null) {
-      await _storage!.setNotificationPermissionGranted(preferences.permissionGranted);
+      await _storage!
+          .setNotificationPermissionGranted(preferences.permissionGranted);
       await _storage!.setWaterRemindersEnabled(preferences.waterReminders);
       await _storage!.setMealRemindersEnabled(preferences.mealReminders);
-      await _storage!.setFastingNotificationsEnabled(preferences.fastingNotifications);
+      await _storage!
+          .setFastingNotificationsEnabled(preferences.fastingNotifications);
       await _storage!.setDailySummaryEnabled(preferences.dailySummary);
     }
-    AppAnalytics.instance.logEvent('notification_preferences_updated', parameters: preferences.toMap());
+    AppAnalytics.instance.logEvent('notification_preferences_updated',
+        parameters: preferences.toMap());
     notifyListeners();
   }
 
   Future<void> requestNotificationPermission() async {
-    notificationPreferences = notificationPreferences.copyWith(permissionGranted: true);
+    notificationPreferences =
+        notificationPreferences.copyWith(permissionGranted: true);
     if (_storage != null) {
       await _storage!.setNotificationPermissionGranted(true);
     }
     AppAnalytics.instance.logEvent('notification_permission_granted');
+    notifyListeners();
+  }
+
+  Future<void> purchasePremium(SubscriptionPlan plan) async {
+    final now = DateTime.now();
+    final renewsAt = switch (plan) {
+      SubscriptionPlan.monthly => now.add(const Duration(days: 30)),
+      SubscriptionPlan.yearly => now.add(const Duration(days: 365)),
+      SubscriptionPlan.free => now,
+    };
+
+    subscriptionState = SubscriptionState(
+      active: plan != SubscriptionPlan.free,
+      plan: plan,
+      source: 'mock_checkout',
+      purchasedAt: now.toIso8601String(),
+      renewsAt:
+          plan == SubscriptionPlan.free ? null : renewsAt.toIso8601String(),
+      lastUpdatedAt: now.toIso8601String(),
+    );
+
+    await _persistSubscriptionState();
+    AppAnalytics.instance.logEvent(
+      'premium_purchased',
+      parameters: {'plan': subscriptionPlanDbValue(plan)},
+    );
+    notifyListeners();
+  }
+
+  Future<void> restorePremiumSubscription() async {
+    subscriptionState = _loadPremiumSubscriptionState();
     notifyListeners();
   }
 
@@ -476,7 +545,9 @@ class AppState extends ChangeNotifier {
         detectedItems: fallback.detectedItems,
         sourceType: sourceType,
         sourceLabel: sourceLabel ?? text,
-        warnings: const ['Canli analiz calismadi. Simdilik ornek analiz gosteriliyor.'],
+        warnings: const [
+          'Canli analiz calismadi. Simdilik ornek analiz gosteriliyor.'
+        ],
       );
       errorMessage = AppErrorParser.message(error);
       AppLogger.error('Meal analysis failed', error: error);
@@ -529,7 +600,9 @@ class AppState extends ChangeNotifier {
           detectedItems: fallback.detectedItems,
           sourceType: MealSourceType.photo,
           sourceLabel: sourceLabel,
-          warnings: const ['Demo modunda foto analiz ornek sonucu gosteriliyor.'],
+          warnings: const [
+            'Demo modunda foto analiz ornek sonucu gosteriliyor.'
+          ],
         );
       }
     } catch (error) {
@@ -542,7 +615,9 @@ class AppState extends ChangeNotifier {
         detectedItems: fallback.detectedItems,
         sourceType: MealSourceType.photo,
         sourceLabel: sourceLabel,
-        warnings: const ['Canli foto analiz calismadi. Simdilik ornek analiz gosteriliyor.'],
+        warnings: const [
+          'Canli foto analiz calismadi. Simdilik ornek analiz gosteriliyor.'
+        ],
       );
       errorMessage = AppErrorParser.message(error);
       AppLogger.error('Photo meal analysis failed', error: error);
@@ -702,7 +777,8 @@ class AppState extends ChangeNotifier {
         fastingSummary = _buildLocalFastingSummary();
       }
       selectedAnalysis = null;
-      AppAnalytics.instance.logEvent('meal_saved', parameters: {'mealType': analysis.mealType.name});
+      AppAnalytics.instance.logEvent('meal_saved',
+          parameters: {'mealType': analysis.mealType.name});
     } catch (error) {
       errorMessage = AppErrorParser.message(error);
       AppLogger.error('Save meal failed', error: error);
@@ -714,7 +790,10 @@ class AppState extends ChangeNotifier {
 
   Future<bool> deleteMeal(Meal meal) async {
     try {
-      if (isAuthenticated && accessToken != null && meal.id != null && meal.id!.isNotEmpty) {
+      if (isAuthenticated &&
+          accessToken != null &&
+          meal.id != null &&
+          meal.id!.isNotEmpty) {
         await _service.deleteMeal(meal.id!);
         await _refreshMealsFromBackend();
         await _refreshProgressSummary();
@@ -770,7 +849,8 @@ class AppState extends ChangeNotifier {
               fatGr: (entryItem.fatGr * ratio).round(),
             );
           }).toList();
-          final totalCalories = updatedItems.fold<int>(0, (sum, entryItem) => sum + entryItem.calories);
+          final totalCalories = updatedItems.fold<int>(
+              0, (sum, entryItem) => sum + entryItem.calories);
           final macros = updatedItems.fold<MacroTargets>(
             MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0),
             (partial, entryItem) => MacroTargets(
@@ -809,7 +889,8 @@ class AppState extends ChangeNotifier {
     FoodServingOption? serving,
   }) async {
     final selectedServing = serving ?? food.primaryServing;
-    final payloadItem = food.toMealItemPayload(quantity: quantity, serving: selectedServing);
+    final payloadItem =
+        food.toMealItemPayload(quantity: quantity, serving: selectedServing);
 
     isSavingMeal = true;
     errorMessage = null;
@@ -842,12 +923,15 @@ class AppState extends ChangeNotifier {
             mealType: mealType,
             title: food.name,
             totalCalories: calories,
-            macros: MacroTargets(proteinGr: proteinGr, carbsGr: carbsGr, fatGr: fatGr),
+            macros: MacroTargets(
+                proteinGr: proteinGr, carbsGr: carbsGr, fatGr: fatGr),
             items: [
               MealItem(
                 name: food.name,
                 quantity: quantity,
-                unit: selectedServing?.metricUnit ?? selectedServing?.description ?? 'serving',
+                unit: selectedServing?.metricUnit ??
+                    selectedServing?.description ??
+                    'serving',
                 calories: calories,
                 proteinGr: proteinGr,
                 carbsGr: carbsGr,
@@ -904,7 +988,9 @@ class AppState extends ChangeNotifier {
   }
 
   void editPlannedMeal(PlannedMeal original, PlannedMeal updated) {
-    dailyPlan = dailyPlan.map((item) => item.id == original.id ? updated : item).toList();
+    dailyPlan = dailyPlan
+        .map((item) => item.id == original.id ? updated : item)
+        .toList();
     AppAnalytics.instance.logEvent('daily_plan_edited');
     notifyListeners();
   }
@@ -914,7 +1000,9 @@ class AppState extends ChangeNotifier {
       id: original.id,
       recipeId: replacement.recipeId ?? replacement.id,
     );
-    dailyPlan = dailyPlan.map((item) => item.id == original.id ? normalized : item).toList();
+    dailyPlan = dailyPlan
+        .map((item) => item.id == original.id ? normalized : item)
+        .toList();
     AppAnalytics.instance.logEvent('daily_plan_alternative_selected');
     notifyListeners();
   }
@@ -953,7 +1041,8 @@ class AppState extends ChangeNotifier {
                     quantity: 1,
                     unit: ingredient.unit,
                     calories: (meal.calories / meal.ingredients.length).round(),
-                    proteinGr: (meal.proteinGr / meal.ingredients.length).round(),
+                    proteinGr:
+                        (meal.proteinGr / meal.ingredients.length).round(),
                     carbsGr: (meal.carbsGr / meal.ingredients.length).round(),
                     fatGr: (meal.fatGr / meal.ingredients.length).round(),
                   ),
@@ -991,7 +1080,8 @@ class AppState extends ChangeNotifier {
       }
 
       dailyPlan = dailyPlan
-          .map((item) => item.id == meal.id ? item.copyWith(isApplied: true) : item)
+          .map((item) =>
+              item.id == meal.id ? item.copyWith(isApplied: true) : item)
           .toList();
       AppAnalytics.instance.logEvent('daily_plan_applied');
       notifyListeners();
@@ -1027,7 +1117,9 @@ class AppState extends ChangeNotifier {
           context: _buildChatContextPayload(),
         );
         chatThread = thread;
-        chatMessages = thread.messages.isNotEmpty ? thread.messages : [...chatMessages, draft];
+        chatMessages = thread.messages.isNotEmpty
+            ? thread.messages
+            : [...chatMessages, draft];
         chatSuggestionChips = thread.suggestionChips;
         chatRecipeCards = thread.recipeCards;
       } else {
@@ -1051,7 +1143,8 @@ class AppState extends ChangeNotifier {
         draft,
         ChatMessage(
           role: ChatRole.assistant,
-          text: 'Suan kısa bir bağlantı sorunu var. İstersen bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner diye sorabilirsin.',
+          text:
+              'Suan kısa bir bağlantı sorunu var. İstersen bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner diye sorabilirsin.',
         ),
       ];
       notifyListeners();
@@ -1084,7 +1177,8 @@ class AppState extends ChangeNotifier {
       onboardingCompleted: user.onboardingCompleted,
     );
 
-    final response = await _service.refreshProfile(profile: seededProfile.toSupabaseMap());
+    final response =
+        await _service.refreshProfile(profile: seededProfile.toSupabaseMap());
     final profileData = response['profile'];
     if (profileData is Map<String, dynamic>) {
       user = UserProfile.fromSupabase(profileData, email: email);
@@ -1167,11 +1261,18 @@ class AppState extends ChangeNotifier {
 
     try {
       if (isAuthenticated && accessToken != null) {
-        final thread = await _service.loadChatThread(context: _buildChatContextPayload());
+        final thread =
+            await _service.loadChatThread(context: _buildChatContextPayload());
         chatThread = thread;
-        chatMessages = thread.messages.isNotEmpty ? thread.messages : _defaultChatMessages();
-        chatSuggestionChips = thread.suggestionChips.isNotEmpty ? thread.suggestionChips : _defaultChatSuggestions();
-        chatRecipeCards = thread.recipeCards.isNotEmpty ? thread.recipeCards : _defaultChatRecipes();
+        chatMessages = thread.messages.isNotEmpty
+            ? thread.messages
+            : _defaultChatMessages();
+        chatSuggestionChips = thread.suggestionChips.isNotEmpty
+            ? thread.suggestionChips
+            : _defaultChatSuggestions();
+        chatRecipeCards = thread.recipeCards.isNotEmpty
+            ? thread.recipeCards
+            : _defaultChatRecipes();
       } else {
         _resetChatLocalState();
       }
@@ -1198,7 +1299,8 @@ class AppState extends ChangeNotifier {
       ChatMessage(
         id: 'assistant-welcome',
         role: ChatRole.assistant,
-        text: 'Merhaba, ben Nuri. Bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner gibi sorularla yardımcı olabilirim.',
+        text:
+            'Merhaba, ben Nuri. Bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner gibi sorularla yardımcı olabilirim.',
         suggestionChips: _defaultChatSuggestions(),
         recipeCards: _defaultChatRecipes(),
         quickActions: const ['camera', 'voice', 'food-search'],
@@ -1209,11 +1311,15 @@ class AppState extends ChangeNotifier {
 
   List<ChatSuggestionChip> _defaultChatSuggestions() {
     return [
-      ChatSuggestionChip(label: 'Bugün ne yemeliyim?', prompt: 'Bugün ne yemeliyim?'),
-      ChatSuggestionChip(label: 'Bu öğün dengeli mi?', prompt: 'Bu öğün dengeli mi?'),
-      ChatSuggestionChip(label: 'Proteinim yeterli mi?', prompt: 'Proteinim yeterli mi?'),
+      ChatSuggestionChip(
+          label: 'Bugün ne yemeliyim?', prompt: 'Bugün ne yemeliyim?'),
+      ChatSuggestionChip(
+          label: 'Bu öğün dengeli mi?', prompt: 'Bu öğün dengeli mi?'),
+      ChatSuggestionChip(
+          label: 'Proteinim yeterli mi?', prompt: 'Proteinim yeterli mi?'),
       ChatSuggestionChip(label: 'Hafif akşam öner', prompt: 'Hafif akşam öner'),
-      ChatSuggestionChip(label: 'Bu yemek kaç kalori?', prompt: 'Bu yemek kaç kalori?'),
+      ChatSuggestionChip(
+          label: 'Bu yemek kaç kalori?', prompt: 'Bu yemek kaç kalori?'),
     ];
   }
 
@@ -1224,7 +1330,9 @@ class AppState extends ChangeNotifier {
 
   ChatRecipeCard _chatRecipeCardFromPlan(PlannedMeal meal) {
     return ChatRecipeCard(
-      recipeId: meal.recipeId ?? meal.id ?? meal.title.toLowerCase().replaceAll(' ', '-'),
+      recipeId: meal.recipeId ??
+          meal.id ??
+          meal.title.toLowerCase().replaceAll(' ', '-'),
       title: meal.title,
       subtitle: meal.description,
       mealType: meal.mealType,
@@ -1246,7 +1354,8 @@ class AppState extends ChangeNotifier {
     final progress = progressSnapshot;
     final fasting = fastingSnapshot;
     final remaining = progress.calorieTarget - progress.consumedCalories;
-    final proteinLeft = progress.macroTargets.proteinGr - progress.consumedMacros.proteinGr;
+    final proteinLeft =
+        progress.macroTargets.proteinGr - progress.consumedMacros.proteinGr;
 
     if (lower.contains('protein')) {
       return ChatMessage(
@@ -1264,7 +1373,8 @@ class AppState extends ChangeNotifier {
     if (lower.contains('kaç kalori') || lower.contains('kalori')) {
       return ChatMessage(
         role: ChatRole.assistant,
-        text: 'Bugün hedefin ${progress.calorieTarget} kcal, şu ana kadar ${progress.consumedCalories} kcal aldın. Kalan yaklaşık ${remaining.clamp(0, 9999)} kcal. İstersen son öğününü de birlikte yorumlayayım.',
+        text:
+            'Bugün hedefin ${progress.calorieTarget} kcal, şu ana kadar ${progress.consumedCalories} kcal aldın. Kalan yaklaşık ${remaining.clamp(0, 9999)} kcal. İstersen son öğününü de birlikte yorumlayayım.',
         suggestionChips: _defaultChatSuggestions(),
         recipeCards: _defaultChatRecipes().take(1).toList(),
         quickActions: const ['camera', 'food-search'],
@@ -1289,7 +1399,8 @@ class AppState extends ChangeNotifier {
 
     return ChatMessage(
       role: ChatRole.assistant,
-      text: 'Bugün hedefe yakın kalmak için yemekleri protein ağırlıklı ve sade tutmak iyi görünüyor. İstersen mevcut öğününü değerlendirip tek tek bakayım.',
+      text:
+          'Bugün hedefe yakın kalmak için yemekleri protein ağırlıklı ve sade tutmak iyi görünüyor. İstersen mevcut öğününü değerlendirip tek tek bakayım.',
       suggestionChips: _defaultChatSuggestions(),
       recipeCards: _defaultChatRecipes(),
       quickActions: const ['camera', 'voice', 'food-search'],
@@ -1306,7 +1417,9 @@ class AppState extends ChangeNotifier {
   Map<String, dynamic> _buildChatContextPayload() {
     final summary = progressSnapshot;
     final fasting = fastingSnapshot;
-    final recentMeals = meals.take(5).map(
+    final recentMeals = meals
+        .take(5)
+        .map(
           (meal) => {
             'id': meal.id,
             'title': meal.title,
@@ -1320,7 +1433,11 @@ class AppState extends ChangeNotifier {
         )
         .toList();
 
-    final planItems = dailyPlan.take(4).map(_chatRecipeCardFromPlan).map((card) => card.toMap()).toList();
+    final planItems = dailyPlan
+        .take(4)
+        .map(_chatRecipeCardFromPlan)
+        .map((card) => card.toMap())
+        .toList();
 
     return {
       'dailyCaloriesTarget': dashboard.calorieTarget,
@@ -1363,7 +1480,8 @@ class AppState extends ChangeNotifier {
           status: FastingSessionStatus.active,
           targetHours: plan.targetHours,
           plannedStartAt: now.toIso8601String(),
-          plannedEndAt: now.add(Duration(hours: plan.targetHours)).toIso8601String(),
+          plannedEndAt:
+              now.add(Duration(hours: plan.targetHours)).toIso8601String(),
           startedAt: now.toIso8601String(),
           metabolicPhase: FastingPhase.earlyFast,
           fastingWindowStart: plan.windowStart,
@@ -1414,12 +1532,16 @@ class AppState extends ChangeNotifier {
         final session = summary.currentSession;
         if (session != null) {
           final ended = session.copyWith(
-            status: breakReason == null ? FastingSessionStatus.completed : FastingSessionStatus.cancelled,
+            status: breakReason == null
+                ? FastingSessionStatus.completed
+                : FastingSessionStatus.cancelled,
             endedAt: DateTime.now().toIso8601String(),
             actualDurationMinutes: session.durationMinutes,
             breakReason: breakReason,
             updatedAt: DateTime.now().toIso8601String(),
-            metabolicPhase: breakReason == null ? FastingPhase.recovery : FastingPhase.recovery,
+            metabolicPhase: breakReason == null
+                ? FastingPhase.recovery
+                : FastingPhase.recovery,
           );
           fastingHistory = [
             ended,
@@ -1467,7 +1589,8 @@ class AppState extends ChangeNotifier {
         fastingSummary = await _service.updateFastingPlan(plan: plan.toMap());
         fastingHistory = fastingSummary?.history ?? fastingHistory;
       } else {
-        fastingSummary = (fastingSummary ?? _buildLocalFastingSummary()).copyWith(
+        fastingSummary =
+            (fastingSummary ?? _buildLocalFastingSummary()).copyWith(
           plan: plan,
           statusLabel: plan.enabled ? 'Başlamaya hazır' : 'Plan kapalı',
           statusDetail: plan.enabled
@@ -1506,7 +1629,8 @@ class AppState extends ChangeNotifier {
       final logged = meal.createdAt;
       final day = DateTime(logged.year, logged.month, logged.day);
       caloriesByDay[day] = (caloriesByDay[day] ?? 0) + meal.totalCalories;
-      final currentMacros = macrosByDay[day] ?? MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0);
+      final currentMacros =
+          macrosByDay[day] ?? MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0);
       macrosByDay[day] = MacroTargets(
         proteinGr: currentMacros.proteinGr + meal.macros.proteinGr,
         carbsGr: currentMacros.carbsGr + meal.macros.carbsGr,
@@ -1516,7 +1640,8 @@ class AppState extends ChangeNotifier {
 
     final dailyTarget = calorieTargetForProfile;
     final weeklyTarget = dailyTarget * 7;
-    final weeklyConsumed = caloriesByDay.values.fold<int>(0, (sum, value) => sum + value);
+    final weeklyConsumed =
+        caloriesByDay.values.fold<int>(0, (sum, value) => sum + value);
     final weeklyBalance = weeklyTarget - weeklyConsumed;
     final macros = weeklyMeals.fold<MacroTargets>(
       MacroTargets(proteinGr: 0, carbsGr: 0, fatGr: 0),
@@ -1547,7 +1672,8 @@ class AppState extends ChangeNotifier {
 
     final streakDays = _calculateStreakDays(weeklyMeals);
     final hydrationTarget = 8;
-    final hydrationCurrent = _estimateHydration(currentMeals: weeklyMeals.length, streakDays: streakDays);
+    final hydrationCurrent = _estimateHydration(
+        currentMeals: weeklyMeals.length, streakDays: streakDays);
     final stepsTarget = _stepsTargetForProfile;
     final stepsCurrent = _estimateSteps(
       meals: weeklyMeals.length,
@@ -1604,13 +1730,18 @@ class AppState extends ChangeNotifier {
     final startedAtIso = session?.startedAt;
     final mealsSinceStart = startedAtIso == null
         ? 0
-        : meals.where((meal) => meal.createdAt.isAfter(DateTime.tryParse(startedAtIso) ?? meal.createdAt)).length;
+        : meals
+            .where((meal) => meal.createdAt
+                .isAfter(DateTime.tryParse(startedAtIso) ?? meal.createdAt))
+            .length;
     final fastedMinutes = session?.durationMinutes ?? 0;
     final remainingMinutes = session?.durationRemainingMinutes ?? 0;
     final activeState = session == null
         ? (plan.enabled ? FastingStateLabel.ready : FastingStateLabel.idle)
         : switch (session.status) {
-            FastingSessionStatus.active => mealsSinceStart > 0 ? FastingStateLabel.broken : FastingStateLabel.active,
+            FastingSessionStatus.active => mealsSinceStart > 0
+                ? FastingStateLabel.broken
+                : FastingStateLabel.active,
             FastingSessionStatus.completed => FastingStateLabel.completed,
             FastingSessionStatus.cancelled => FastingStateLabel.completed,
             FastingSessionStatus.planned => FastingStateLabel.ready,
@@ -1625,8 +1756,10 @@ class AppState extends ChangeNotifier {
       FastingStateLabel.completed => 'Son oturum tamamlandı',
     };
     final statusDetail = switch (activeState) {
-      FastingStateLabel.idle => 'Fasting planı kapalı; istersen buradan açabiliriz.',
-      FastingStateLabel.ready => 'Plan ${plan.label} olarak ayarlı. ${plan.windowStart} - ${plan.windowEnd} penceresi hazır.',
+      FastingStateLabel.idle =>
+        'Fasting planı kapalı; istersen buradan açabiliriz.',
+      FastingStateLabel.ready =>
+        'Plan ${plan.label} olarak ayarlı. ${plan.windowStart} - ${plan.windowEnd} penceresi hazır.',
       FastingStateLabel.active => 'Yerel moda göre oturum sürüyor.',
       FastingStateLabel.broken => 'Başlangıçtan sonra öğün kaydı var.',
       FastingStateLabel.completed => 'Son oturum tamamlandı.',
@@ -1642,7 +1775,8 @@ class AppState extends ChangeNotifier {
       metabolicPhase: metabolicPhase,
       metabolicPhaseLabel: metabolicPhase.title,
       metabolicPhaseDetail: switch (metabolicPhase) {
-        FastingPhase.earlyFast => 'Son öğünden sonra vücut önce glikozu kullanıyor.',
+        FastingPhase.earlyFast =>
+          'Son öğünden sonra vücut önce glikozu kullanıyor.',
         FastingPhase.fatBurning => 'Yağ kullanımına geçiş başlıyor.',
         FastingPhase.deepFast => 'Su ve elektrolit takibi önemli.',
         FastingPhase.recovery => 'Yeniden beslenme penceresi.',
@@ -1656,17 +1790,39 @@ class AppState extends ChangeNotifier {
       weeklyInsight: plan.enabled
           ? 'Fasting plani hazir; baslatildiginda state otomatik guncellenecek.'
           : 'Plan kapali görünüyor.',
-      achievements: history.isNotEmpty ? ['Son fasting kaydı hazır'] : ['İlk fasting oturumu için hazır'],
+      achievements: history.isNotEmpty
+          ? ['Son fasting kaydı hazır']
+          : ['İlk fasting oturumu için hazır'],
       isEmpty: !plan.enabled && history.isEmpty && session == null,
     );
   }
 
   FastingPlan _defaultFastingPlanForProfile() {
     return switch (user.selectedGoal) {
-      Goal.gainMuscle => FastingPlan(enabled: true, targetHours: 14, windowStart: '21:00', windowEnd: '11:00', label: '14:10'),
-      Goal.maintain => FastingPlan(enabled: true, targetHours: 16, windowStart: '20:30', windowEnd: '12:30', label: '16:8'),
-      Goal.fasting => FastingPlan(enabled: true, targetHours: 18, windowStart: '20:00', windowEnd: '12:00', label: '18:6'),
-      Goal.weightLoss => FastingPlan(enabled: true, targetHours: 18, windowStart: '20:00', windowEnd: '12:00', label: '18:6'),
+      Goal.gainMuscle => FastingPlan(
+          enabled: true,
+          targetHours: 14,
+          windowStart: '21:00',
+          windowEnd: '11:00',
+          label: '14:10'),
+      Goal.maintain => FastingPlan(
+          enabled: true,
+          targetHours: 16,
+          windowStart: '20:30',
+          windowEnd: '12:30',
+          label: '16:8'),
+      Goal.fasting => FastingPlan(
+          enabled: true,
+          targetHours: 18,
+          windowStart: '20:00',
+          windowEnd: '12:00',
+          label: '18:6'),
+      Goal.weightLoss => FastingPlan(
+          enabled: true,
+          targetHours: 18,
+          windowStart: '20:00',
+          windowEnd: '12:00',
+          label: '18:6'),
     };
   }
 
@@ -1680,7 +1836,8 @@ class AppState extends ChangeNotifier {
     int streak = 0;
     final today = DateTime.now();
     for (int offset = 0; offset < 30; offset++) {
-      final day = DateTime(today.year, today.month, today.day).subtract(Duration(days: offset));
+      final day = DateTime(today.year, today.month, today.day)
+          .subtract(Duration(days: offset));
       if (!byDay.contains(day)) break;
       streak += 1;
     }
@@ -1733,7 +1890,9 @@ class AppState extends ChangeNotifier {
       achievements.add('$streakDays gunluk kayit serisi');
     }
 
-    final proteinRatio = macroTargets.proteinGr == 0 ? 0.0 : consumedMacros.proteinGr / macroTargets.proteinGr;
+    final proteinRatio = macroTargets.proteinGr == 0
+        ? 0.0
+        : consumedMacros.proteinGr / macroTargets.proteinGr;
     if (proteinRatio >= 0.8) {
       achievements.add('Protein hedefinin %80+ seviyesine ulastin');
     }
@@ -1743,7 +1902,8 @@ class AppState extends ChangeNotifier {
     }
 
     if (achievements.isEmpty) {
-      achievements.add('Bu hafta yeni bir hedef yakalamak icin iyi bir baslangic var');
+      achievements
+          .add('Bu hafta yeni bir hedef yakalamak icin iyi bir baslangic var');
     }
 
     return achievements;
@@ -1758,7 +1918,9 @@ class AppState extends ChangeNotifier {
     required double estimatedDeltaKg,
   }) {
     final caloriesGap = weeklyTarget - weeklyConsumed;
-    final proteinRatio = macroTargets.proteinGr == 0 ? 0.0 : consumedMacros.proteinGr / macroTargets.proteinGr;
+    final proteinRatio = macroTargets.proteinGr == 0
+        ? 0.0
+        : consumedMacros.proteinGr / macroTargets.proteinGr;
     final calorieLine = caloriesGap >= 0
         ? 'Bu hafta kalori dengesi hedefe yakin; yaklasik ${caloriesGap ~/ 7} kcal gunluk acik var.'
         : 'Bu hafta hedefin uzerine cikilmis; gunluk ortalama ${(-caloriesGap) ~/ 7} kcal fazla gorunuyor.';
@@ -1811,7 +1973,8 @@ class AppState extends ChangeNotifier {
 
   Future<void> _persistProfileAndRefresh() async {
     if (isAuthenticated) {
-      final response = await _service.refreshProfile(profile: user.toSupabaseMap());
+      final response =
+          await _service.refreshProfile(profile: user.toSupabaseMap());
       final profileData = response['profile'];
       if (profileData is Map<String, dynamic>) {
         user = UserProfile.fromSupabase(profileData, email: user.email);
@@ -1820,6 +1983,32 @@ class AppState extends ChangeNotifier {
       await _refreshProgressSummary();
       await _refreshChatThread();
     }
+  }
+
+  SubscriptionState _loadPremiumSubscriptionState() {
+    final json = _storage?.premiumSubscriptionStateJson;
+    if (json == null || json.isEmpty) {
+      return SubscriptionState();
+    }
+
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is Map<String, dynamic>) {
+        return SubscriptionState.fromMap(decoded);
+      }
+      if (decoded is Map) {
+        return SubscriptionState.fromMap(Map<String, dynamic>.from(decoded));
+      }
+    } catch (error) {
+      AppLogger.error('Premium state decode failed', error: error);
+    }
+
+    return SubscriptionState();
+  }
+
+  Future<void> _persistSubscriptionState() async {
+    if (_storage == null) return;
+    await _storage!.setPremiumSubscriptionState(subscriptionState.toMap());
   }
 
   Future<void> _loadNotificationPreferences() async {
@@ -1843,14 +2032,29 @@ class AppState extends ChangeNotifier {
     final items = (response['detectedItems'] as List<dynamic>? ?? const [])
         .map(
           (dynamic item) => MealItem(
-            foodId: item is Map<String, dynamic> ? item['foodId'] as String? : null,
-            name: item is Map<String, dynamic> ? (item['name'] as String? ?? 'Food') : 'Food',
-            quantity: item is Map<String, dynamic> ? (item['quantity'] as num?)?.toDouble() ?? 1 : 1,
-            unit: item is Map<String, dynamic> ? (item['unit'] as String? ?? 'serving') : 'serving',
-            calories: item is Map<String, dynamic> ? (item['calories'] as num?)?.toInt() ?? 0 : 0,
-            proteinGr: item is Map<String, dynamic> ? (item['proteinGr'] as num?)?.toInt() ?? 0 : 0,
-            carbsGr: item is Map<String, dynamic> ? (item['carbsGr'] as num?)?.toInt() ?? 0 : 0,
-            fatGr: item is Map<String, dynamic> ? (item['fatGr'] as num?)?.toInt() ?? 0 : 0,
+            foodId:
+                item is Map<String, dynamic> ? item['foodId'] as String? : null,
+            name: item is Map<String, dynamic>
+                ? (item['name'] as String? ?? 'Food')
+                : 'Food',
+            quantity: item is Map<String, dynamic>
+                ? (item['quantity'] as num?)?.toDouble() ?? 1
+                : 1,
+            unit: item is Map<String, dynamic>
+                ? (item['unit'] as String? ?? 'serving')
+                : 'serving',
+            calories: item is Map<String, dynamic>
+                ? (item['calories'] as num?)?.toInt() ?? 0
+                : 0,
+            proteinGr: item is Map<String, dynamic>
+                ? (item['proteinGr'] as num?)?.toInt() ?? 0
+                : 0,
+            carbsGr: item is Map<String, dynamic>
+                ? (item['carbsGr'] as num?)?.toInt() ?? 0
+                : 0,
+            fatGr: item is Map<String, dynamic>
+                ? (item['fatGr'] as num?)?.toInt() ?? 0
+                : 0,
           ),
         )
         .toList();
@@ -1868,7 +2072,9 @@ class AppState extends ChangeNotifier {
       detectedItems: items.isEmpty ? MockData.analysis.detectedItems : items,
       sourceType: sourceType,
       sourceLabel: sourceLabel,
-      warnings: (response['warnings'] as List<dynamic>? ?? const []).map((e) => e.toString()).toList(),
+      warnings: (response['warnings'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
     );
   }
 

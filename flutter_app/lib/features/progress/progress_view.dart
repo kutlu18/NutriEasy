@@ -6,6 +6,7 @@ import '../../app/app_scope.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
+import '../premium/premium_view.dart' as premium;
 
 class ProgressView extends StatefulWidget {
   const ProgressView({super.key});
@@ -59,6 +60,23 @@ class _ProgressViewState extends State<ProgressView> {
             const SizedBox(height: 14),
             _MetricStrip(summary: summary),
             const SizedBox(height: 16),
+            if (state.canAccessAdvancedInsights)
+              _AdvancedInsightCard(summary: summary)
+            else
+              _PremiumGateCard(
+                title: 'Gelişmiş içgörü',
+                subtitle: 'Premium ile trendler daha yorumlayici hale gelir.',
+                benefits: const [
+                  'Haftalik yorumlar',
+                  'Derin makro baglanti',
+                  'Daha akilli karar destek',
+                ],
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const premium.PremiumView()),
+                ),
+              ),
+            const SizedBox(height: 16),
             _TrendCard(summary: summary),
             const SizedBox(height: 16),
             _MacroCard(summary: summary),
@@ -70,7 +88,8 @@ class _ProgressViewState extends State<ProgressView> {
             if (summary.isEmpty)
               EmptyState(
                 title: 'Henuz takip verisi yok',
-                subtitle: 'Ilk ogun kaydettiginde, kilo tahmini, kalori dengesi ve seri otomatik dolacak.',
+                subtitle:
+                    'Ilk ogun kaydettiginde, kilo tahmini, kalori dengesi ve seri otomatik dolacak.',
                 icon: Icons.timeline,
                 actionLabel: 'Ogün ekle',
                 onAction: () => state.setMainTabIndex(1),
@@ -108,7 +127,8 @@ class ProgressDetailView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Haftalik analiz', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Haftalik analiz',
+              style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 8),
           Text(
             'Veriler hedefe gore yorumlanir. Kilo trendi tahminidir; yeme kayitlarindan uretilir.',
@@ -144,14 +164,18 @@ class ProgressDetailView extends StatelessWidget {
                               color: NutriColors.mint,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.calendar_today, color: NutriColors.leaf, size: 18),
+                            child: const Icon(Icons.calendar_today,
+                                color: NutriColors.leaf, size: 18),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(_formatDayLabel(point.date), style: Theme.of(context).textTheme.titleMedium),
+                                Text(_formatDayLabel(point.date),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
                                 const SizedBox(height: 2),
                                 Text(
                                   '${point.caloriesConsumed} kcal alinmis',
@@ -162,7 +186,10 @@ class ProgressDetailView extends StatelessWidget {
                           ),
                           Text(
                             '${point.weightKg.toStringAsFixed(1)} kg',
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(color: NutriColors.leaf),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(color: NutriColors.leaf),
                           ),
                         ],
                       ),
@@ -220,11 +247,18 @@ class _SummaryHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kalori dengesi', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: NutriColors.muted)),
+          Text('Kalori dengesi',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(color: NutriColors.muted)),
           const SizedBox(height: 6),
           Text(
             summary.calorieBalanceLabel,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(color: accentColor),
+            style: Theme.of(context)
+                .textTheme
+                .displaySmall
+                ?.copyWith(color: accentColor),
           ),
           const SizedBox(height: 6),
           Text(
@@ -451,7 +485,8 @@ class _DetailMetricGrid extends StatelessWidget {
             Expanded(
               child: _MiniMetric(
                 title: 'Protein',
-                value: '${summary.consumedMacros.proteinGr}/${summary.macroTargets.proteinGr}',
+                value:
+                    '${summary.consumedMacros.proteinGr}/${summary.macroTargets.proteinGr}',
                 subtitle: 'g / hafta',
                 tint: NutriColors.leaf,
                 icon: Icons.fitness_center,
@@ -461,7 +496,8 @@ class _DetailMetricGrid extends StatelessWidget {
             Expanded(
               child: _MiniMetric(
                 title: 'Karb.',
-                value: '${summary.consumedMacros.carbsGr}/${summary.macroTargets.carbsGr}',
+                value:
+                    '${summary.consumedMacros.carbsGr}/${summary.macroTargets.carbsGr}',
                 subtitle: 'g / hafta',
                 tint: NutriColors.amber,
                 icon: Icons.bolt,
@@ -475,7 +511,8 @@ class _DetailMetricGrid extends StatelessWidget {
             Expanded(
               child: _MiniMetric(
                 title: 'Yag',
-                value: '${summary.consumedMacros.fatGr}/${summary.macroTargets.fatGr}',
+                value:
+                    '${summary.consumedMacros.fatGr}/${summary.macroTargets.fatGr}',
                 subtitle: 'g / hafta',
                 tint: NutriColors.coral,
                 icon: Icons.opacity,
@@ -544,7 +581,11 @@ class _InlineStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: NutriColors.muted)),
+        Text(label,
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(color: NutriColors.muted)),
         const SizedBox(height: 4),
         Text(value, style: Theme.of(context).textTheme.titleMedium),
       ],
@@ -623,8 +664,11 @@ class _MacroRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-              Text('$current / $target g', style: Theme.of(context).textTheme.bodySmall),
+              Expanded(
+                  child: Text(label,
+                      style: Theme.of(context).textTheme.titleMedium)),
+              Text('$current / $target g',
+                  style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
           const SizedBox(height: 8),
@@ -636,6 +680,141 @@ class _MacroRow extends StatelessWidget {
               backgroundColor: Colors.white,
               valueColor: AlwaysStoppedAnimation<Color>(tint),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdvancedInsightCard extends StatelessWidget {
+  const _AdvancedInsightCard({required this.summary});
+
+  final ProgressSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final balance = summary.calorieBalance;
+    final isPositive = balance >= 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDFF0E6),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Gelişmiş yorum', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(
+            isPositive
+                ? 'Hafta dengeli ilerliyor. Bu ritim korunursa hedefe daha kontrollü yaklaşırsın.'
+                : 'Kalori dengesi biraz yukarıda. Bir sonraki iki öğünü sadeleştirmek iyi olabilir.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _InsightTile(
+                  label: 'Kalori farkı',
+                  value: summary.calorieBalanceLabel,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _InsightTile(
+                  label: 'Haftalık trend',
+                  value: summary.weightDeltaLabel,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightTile extends StatelessWidget {
+  const _InsightTile({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text(value, style: Theme.of(context).textTheme.titleMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _PremiumGateCard extends StatelessWidget {
+  const _PremiumGateCard({
+    required this.title,
+    required this.subtitle,
+    required this.benefits,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<String> benefits;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F1EE),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 12),
+          ...benefits.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_outline,
+                      color: NutriColors.leaf, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(item)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          PrimaryButton(
+            title: 'Premium ac',
+            icon: Icons.workspace_premium_outlined,
+            onPressed: onPressed,
           ),
         ],
       ),
@@ -669,7 +848,10 @@ class ProgressTrendChart extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: points.map((point) => Text(_shortDayLabel(point.date), style: Theme.of(context).textTheme.bodySmall)).toList(),
+              children: points
+                  .map((point) => Text(_shortDayLabel(point.date),
+                      style: Theme.of(context).textTheme.bodySmall))
+                  .toList(),
             ),
           ],
         );
@@ -731,7 +913,8 @@ class _TrendPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _TrendPainter oldDelegate) => oldDelegate.points != points;
+  bool shouldRepaint(covariant _TrendPainter oldDelegate) =>
+      oldDelegate.points != points;
 }
 
 String _shortDayLabel(DateTime date) {
@@ -740,6 +923,19 @@ String _shortDayLabel(DateTime date) {
 }
 
 String _formatDayLabel(DateTime date) {
-  const months = <String>['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const months = <String>[
+    'Oca',
+    'Sub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Agu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara'
+  ];
   return '${date.day} ${months[date.month - 1]}';
 }

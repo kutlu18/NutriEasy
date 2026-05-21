@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppLocalStorage {
@@ -14,6 +16,7 @@ class AppLocalStorage {
   static const _mealRemindersKey = 'meal_reminders_enabled';
   static const _fastingNotificationsKey = 'fasting_notifications_enabled';
   static const _dailySummaryKey = 'daily_summary_enabled';
+  static const _premiumSubscriptionKey = 'premium_subscription_state';
 
   static Future<AppLocalStorage> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -56,4 +59,18 @@ class AppLocalStorage {
   Future<void> setMealRemindersEnabled(bool value) => _prefs.setBool(_mealRemindersKey, value);
   Future<void> setFastingNotificationsEnabled(bool value) => _prefs.setBool(_fastingNotificationsKey, value);
   Future<void> setDailySummaryEnabled(bool value) => _prefs.setBool(_dailySummaryKey, value);
+
+  String? get premiumSubscriptionStateJson => _prefs.getString(_premiumSubscriptionKey);
+
+  Future<void> setPremiumSubscriptionStateJson(String? value) async {
+    if (value == null || value.isEmpty) {
+      await _prefs.remove(_premiumSubscriptionKey);
+      return;
+    }
+
+    await _prefs.setString(_premiumSubscriptionKey, value);
+  }
+
+  Future<void> setPremiumSubscriptionState(Map<String, dynamic> value) =>
+      setPremiumSubscriptionStateJson(jsonEncode(value));
 }

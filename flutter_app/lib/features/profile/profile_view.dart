@@ -4,6 +4,7 @@ import '../../app/app_scope.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../fasting/fasting_view.dart';
+import '../premium/premium_view.dart' as premium;
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -30,12 +31,16 @@ class ProfileView extends StatelessWidget {
                 title: 'Hesap ayarları',
                 subtitle: 'İsim, boy, kilo ve hedef bilgilerini düzenle',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AccountSettingsView()),
+                  MaterialPageRoute(
+                      builder: (_) => const AccountSettingsView()),
                 ),
               ),
               _RowItem(title: 'Hedef', value: state.user.selectedGoal.title),
-              _RowItem(title: 'Aktivite', value: state.user.activityLevel.title),
-              _RowItem(title: 'Öğün girişi', value: state.user.preferredLoggingMethod.title),
+              _RowItem(
+                  title: 'Aktivite', value: state.user.activityLevel.title),
+              _RowItem(
+                  title: 'Öğün girişi',
+                  value: state.user.preferredLoggingMethod.title),
               const SizedBox(height: 16),
               _SectionTitle(title: 'Hatırlatmalar'),
               const SizedBox(height: 10),
@@ -45,8 +50,10 @@ class ProfileView extends StatelessWidget {
                     ? 'Bildirim izni verilmiş.'
                     : 'Bildirim izni henüz verilmedi.',
                 trailing: preferences.permissionGranted
-                    ? const Icon(Icons.notifications_active_outlined, color: NutriColors.leaf)
-                    : const Icon(Icons.notifications_off_outlined, color: NutriColors.coral),
+                    ? const Icon(Icons.notifications_active_outlined,
+                        color: NutriColors.leaf)
+                    : const Icon(Icons.notifications_off_outlined,
+                        color: NutriColors.coral),
               ),
               const SizedBox(height: 10),
               _RowItem(
@@ -72,21 +79,24 @@ class ProfileView extends StatelessWidget {
                 title: 'Hesap ayarları',
                 subtitle: 'İsim, boy, kilo, hedef ve logging tercihleri',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AccountSettingsView()),
+                  MaterialPageRoute(
+                      builder: (_) => const AccountSettingsView()),
                 ),
               ),
               _ActionItem(
                 title: 'Bildirimler',
                 subtitle: 'Hatırlatma tercihlerini ve izin durumunu yönet',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NotificationSettingsView()),
+                  MaterialPageRoute(
+                      builder: (_) => const NotificationSettingsView()),
                 ),
               ),
               _ActionItem(
                 title: 'Premium',
                 subtitle: 'Gelecek ödeme katmanı için mock alan',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PremiumView()),
+                  MaterialPageRoute(
+                      builder: (_) => const premium.PremiumView()),
                 ),
               ),
               _ActionItem(
@@ -120,7 +130,8 @@ class ProfileView extends StatelessWidget {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Çıkış yap'),
-          content: const Text('Bu cihazda oturumu kapatmak istediğine emin misin?'),
+          content:
+              const Text('Bu cihazda oturumu kapatmak istediğine emin misin?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -164,9 +175,12 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
     final state = AppScope.of(context);
     _nameController = TextEditingController(text: state.user.name);
     _ageController = TextEditingController(text: state.user.age.toString());
-    _heightController = TextEditingController(text: state.user.heightCm.toString());
-    _weightController = TextEditingController(text: state.user.weightKg.toString());
-    _targetWeightController = TextEditingController(text: state.user.targetWeightKg?.toString() ?? '');
+    _heightController =
+        TextEditingController(text: state.user.heightCm.toString());
+    _weightController =
+        TextEditingController(text: state.user.weightKg.toString());
+    _targetWeightController = TextEditingController(
+        text: state.user.targetWeightKg?.toString() ?? '');
     _goal = state.user.selectedGoal;
     _activityLevel = state.user.activityLevel;
     _loggingMethod = state.user.preferredLoggingMethod;
@@ -199,7 +213,8 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'İsim'),
-              validator: (value) => value == null || value.trim().length < 2 ? 'İsim gir' : null,
+              validator: (value) =>
+                  value == null || value.trim().length < 2 ? 'İsim gir' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -226,10 +241,13 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             TextFormField(
               controller: _targetWeightController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Hedef kilo (opsiyonel)'),
+              decoration:
+                  const InputDecoration(labelText: 'Hedef kilo (opsiyonel)'),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) return null;
-                return int.tryParse(value.trim()) == null ? 'Geçerli bir sayı gir' : null;
+                return int.tryParse(value.trim()) == null
+                    ? 'Geçerli bir sayı gir'
+                    : null;
               },
             ),
             const SizedBox(height: 16),
@@ -237,7 +255,8 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
               value: _goal,
               decoration: const InputDecoration(labelText: 'Hedef'),
               items: Goal.values
-                  .map((goal) => DropdownMenuItem(value: goal, child: Text(goal.title)))
+                  .map((goal) =>
+                      DropdownMenuItem(value: goal, child: Text(goal.title)))
                   .toList(),
               onChanged: (value) => setState(() => _goal = value ?? _goal),
             ),
@@ -246,18 +265,23 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
               value: _activityLevel,
               decoration: const InputDecoration(labelText: 'Aktivite seviyesi'),
               items: ActivityLevel.values
-                  .map((level) => DropdownMenuItem(value: level, child: Text(level.title)))
+                  .map((level) =>
+                      DropdownMenuItem(value: level, child: Text(level.title)))
                   .toList(),
-              onChanged: (value) => setState(() => _activityLevel = value ?? _activityLevel),
+              onChanged: (value) =>
+                  setState(() => _activityLevel = value ?? _activityLevel),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<LoggingMethod>(
               value: _loggingMethod,
-              decoration: const InputDecoration(labelText: 'Öğün girişi tercihi'),
+              decoration:
+                  const InputDecoration(labelText: 'Öğün girişi tercihi'),
               items: LoggingMethod.values
-                  .map((method) => DropdownMenuItem(value: method, child: Text(method.title)))
+                  .map((method) => DropdownMenuItem(
+                      value: method, child: Text(method.title)))
                   .toList(),
-              onChanged: (value) => setState(() => _loggingMethod = value ?? _loggingMethod),
+              onChanged: (value) =>
+                  setState(() => _loggingMethod = value ?? _loggingMethod),
             ),
             const SizedBox(height: 20),
             FilledButton.icon(
@@ -272,7 +296,9 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
                         age: int.parse(_ageController.text.trim()),
                         heightCm: int.parse(_heightController.text.trim()),
                         weightKg: int.parse(_weightController.text.trim()),
-                        targetWeightKg: _targetWeightController.text.trim().isEmpty
+                        targetWeightKg: _targetWeightController.text
+                                .trim()
+                                .isEmpty
                             ? null
                             : int.parse(_targetWeightController.text.trim()),
                         selectedGoal: _goal,
@@ -289,7 +315,8 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.save_outlined),
               label: Text(_saving ? 'Kaydediliyor...' : 'Kaydet'),
@@ -313,7 +340,8 @@ class NotificationSettingsView extends StatefulWidget {
   const NotificationSettingsView({super.key});
 
   @override
-  State<NotificationSettingsView> createState() => _NotificationSettingsViewState();
+  State<NotificationSettingsView> createState() =>
+      _NotificationSettingsViewState();
 }
 
 class _NotificationSettingsViewState extends State<NotificationSettingsView> {
@@ -352,7 +380,8 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
                         _preferences = state.notificationPreferences;
                       });
                     },
-              child: Text(_preferences.permissionGranted ? 'Verildi' : 'İzin ver'),
+              child:
+                  Text(_preferences.permissionGranted ? 'Verildi' : 'İzin ver'),
             ),
           ),
           const SizedBox(height: 16),
@@ -360,31 +389,37 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
             title: const Text('Su hatırlatma'),
             subtitle: const Text('Gün içinde su içmeyi hatırlat'),
             value: _preferences.waterReminders,
-            onChanged: (value) => setState(() => _preferences = _preferences.copyWith(waterReminders: value)),
+            onChanged: (value) => setState(() =>
+                _preferences = _preferences.copyWith(waterReminders: value)),
           ),
           SwitchListTile.adaptive(
             title: const Text('Öğün hatırlatma'),
             subtitle: const Text('Kayıt zamanı yaklaşınca uyar'),
             value: _preferences.mealReminders,
-            onChanged: (value) => setState(() => _preferences = _preferences.copyWith(mealReminders: value)),
+            onChanged: (value) => setState(() =>
+                _preferences = _preferences.copyWith(mealReminders: value)),
           ),
           SwitchListTile.adaptive(
             title: const Text('Fasting başlangıç / bitiş'),
             subtitle: const Text('Oruç penceresini hatırlat'),
             value: _preferences.fastingNotifications,
-            onChanged: (value) => setState(() => _preferences = _preferences.copyWith(fastingNotifications: value)),
+            onChanged: (value) => setState(() => _preferences =
+                _preferences.copyWith(fastingNotifications: value)),
           ),
           SwitchListTile.adaptive(
             title: const Text('Günlük özet'),
             subtitle: const Text('Günün sonunda kısa özet gönder'),
             value: _preferences.dailySummary,
-            onChanged: (value) => setState(() => _preferences = _preferences.copyWith(dailySummary: value)),
+            onChanged: (value) => setState(() =>
+                _preferences = _preferences.copyWith(dailySummary: value)),
           ),
           const SizedBox(height: 16),
           _StatusCard(
             title: 'Push hedefleri',
-            subtitle: 'MVP aşamasında sistem bildirimi entegrasyonu yok, ama tercihlerin hazır tutuluyor.',
-            trailing: const Icon(Icons.notifications_active_outlined, color: NutriColors.leaf),
+            subtitle:
+                'MVP aşamasında sistem bildirimi entegrasyonu yok, ama tercihlerin hazır tutuluyor.',
+            trailing: const Icon(Icons.notifications_active_outlined,
+                color: NutriColors.leaf),
           ),
           const SizedBox(height: 20),
           FilledButton.icon(
@@ -401,7 +436,8 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.save_outlined),
             label: Text(_saving ? 'Kaydediliyor...' : 'Tercihleri kaydet'),
@@ -427,7 +463,8 @@ class PremiumView extends StatelessWidget {
             children: [
               Icon(Icons.workspace_premium, size: 56, color: NutriColors.amber),
               SizedBox(height: 16),
-              Text('Premium ekranı mock', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text('Premium ekranı mock',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               SizedBox(height: 8),
               Text('Ödeme entegrasyonu MVP dışında bırakıldı.'),
             ],
@@ -596,7 +633,10 @@ class _MiniPill extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: NutriColors.leaf, fontWeight: FontWeight.w700),
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall
+            ?.copyWith(color: NutriColors.leaf, fontWeight: FontWeight.w700),
       ),
     );
   }
