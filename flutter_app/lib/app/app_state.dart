@@ -17,6 +17,8 @@ class AppState extends ChangeNotifier {
         meals = List<Meal>.from(MockData.meals),
         dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals),
         fastingHistory = const [],
+        chatSuggestionChips = const [],
+        chatRecipeCards = const [],
         chatMessages = [
           ChatMessage(
             role: ChatRole.assistant,
@@ -49,10 +51,15 @@ class AppState extends ChangeNotifier {
   FastingSummary? fastingSummary;
   List<FastingSession> fastingHistory;
   List<String> foodSearchHistory = const [];
+  ChatThread? chatThread;
+  List<ChatSuggestionChip> chatSuggestionChips;
+  List<ChatRecipeCard> chatRecipeCards;
   MealAnalysis? selectedAnalysis;
   List<ChatMessage> chatMessages;
   bool isLoadingProgress = false;
   bool isLoadingFasting = false;
+  bool isLoadingChat = false;
+  bool isSendingChat = false;
 
   TodayDashboard get dashboard {
     final calories = meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
@@ -152,6 +159,7 @@ class AppState extends ChangeNotifier {
     } else {
       fastingSummary = _buildLocalFastingSummary();
       fastingHistory = fastingSummary?.history ?? const [];
+      _resetChatLocalState();
     }
 
     _applySessionToShell();
@@ -269,6 +277,8 @@ class AppState extends ChangeNotifier {
       progressSummary = null;
       fastingSummary = null;
       fastingHistory = const [];
+      chatThread = null;
+      _resetChatLocalState();
       isLoadingProgress = false;
       isLoadingFasting = false;
       foodSearchHistory = const [];
@@ -966,20 +976,60 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  void sendChat(String text) {
+  Future<void> sendChat(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
-    chatMessages = [
-      ...chatMessages,
-      ChatMessage(role: ChatRole.user, text: trimmed),
-      ChatMessage(
-        role: ChatRole.assistant,
-        text: 'Bugunku protein hedefin icin aksam ogununde yogurt veya izgara tavuk iyi gider. Istersen plana ekleyebilirim.',
-      ),
-    ];
-    AppAnalytics.instance.logEvent('chat_message_sent');
+    isSendingChat = true;
+    errorMessage = null;
     notifyListeners();
+
+    final draft = ChatMessage(
+      id: 'local-${DateTime.now().microsecondsSinceEpoch}',
+      role: ChatRole.user,
+      text: trimmed,
+    );
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        final thread = await _service.sendChatMessage(
+          message: trimmed,
+          threadId: chatThread?.id,
+          context: _buildChatContextPayload(),
+        );
+        chatThread = thread;
+        chatMessages = thread.messages.isNotEmpty ? thread.messages : [...chatMessages, draft];
+        chatSuggestionChips = thread.suggestionChips;
+        chatRecipeCards = thread.recipeCards;
+      } else {
+        final assistant = _localChatReply(trimmed);
+        chatMessages = [
+          ...chatMessages,
+          draft,
+          assistant,
+        ];
+        chatSuggestionChips = assistant.suggestionChips;
+        chatRecipeCards = assistant.recipeCards;
+      }
+
+      AppAnalytics.instance.logEvent('chat_message_sent');
+      notifyListeners();
+    } catch (error) {
+      errorMessage = AppErrorParser.message(error);
+      AppLogger.error('Chat send failed', error: error);
+      chatMessages = [
+        ...chatMessages,
+        draft,
+        ChatMessage(
+          role: ChatRole.assistant,
+          text: 'Suan kısa bir bağlantı sorunu var. İstersen bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner diye sorabilirsin.',
+        ),
+      ];
+      notifyListeners();
+    } finally {
+      isSendingChat = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _syncProfileFromSession(Session session) async {
@@ -1080,6 +1130,191 @@ class AppState extends ChangeNotifier {
       isLoadingFasting = false;
       notifyListeners();
     }
+  }
+
+  Future<void> _refreshChatThread() async {
+    isLoadingChat = true;
+    notifyListeners();
+
+    try {
+      if (isAuthenticated && accessToken != null) {
+        final thread = await _service.loadChatThread(context: _buildChatContextPayload());
+        chatThread = thread;
+        chatMessages = thread.messages.isNotEmpty ? thread.messages : _defaultChatMessages();
+        chatSuggestionChips = thread.suggestionChips.isNotEmpty ? thread.suggestionChips : _defaultChatSuggestions();
+        chatRecipeCards = thread.recipeCards.isNotEmpty ? thread.recipeCards : _defaultChatRecipes();
+      } else {
+        _resetChatLocalState();
+      }
+    } catch (error) {
+      AppLogger.error('Chat refresh failed', error: error);
+      _resetChatLocalState();
+    } finally {
+      isLoadingChat = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshChatThread() => _refreshChatThread();
+
+  void _resetChatLocalState() {
+    chatThread = null;
+    chatMessages = _defaultChatMessages();
+    chatSuggestionChips = _defaultChatSuggestions();
+    chatRecipeCards = _defaultChatRecipes();
+  }
+
+  List<ChatMessage> _defaultChatMessages() {
+    return [
+      ChatMessage(
+        id: 'assistant-welcome',
+        role: ChatRole.assistant,
+        text: 'Merhaba, ben Nuri. Bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner gibi sorularla yardımcı olabilirim.',
+        suggestionChips: _defaultChatSuggestions(),
+        recipeCards: _defaultChatRecipes(),
+        quickActions: const ['camera', 'voice', 'food-search'],
+        contextSummary: _chatContextHeadline(),
+      ),
+    ];
+  }
+
+  List<ChatSuggestionChip> _defaultChatSuggestions() {
+    return [
+      ChatSuggestionChip(label: 'Bugün ne yemeliyim?', prompt: 'Bugün ne yemeliyim?'),
+      ChatSuggestionChip(label: 'Bu öğün dengeli mi?', prompt: 'Bu öğün dengeli mi?'),
+      ChatSuggestionChip(label: 'Proteinim yeterli mi?', prompt: 'Proteinim yeterli mi?'),
+      ChatSuggestionChip(label: 'Hafif akşam öner', prompt: 'Hafif akşam öner'),
+      ChatSuggestionChip(label: 'Bu yemek kaç kalori?', prompt: 'Bu yemek kaç kalori?'),
+    ];
+  }
+
+  List<ChatRecipeCard> _defaultChatRecipes() {
+    final meals = dailyPlan.take(3).toList();
+    return meals.map(_chatRecipeCardFromPlan).toList();
+  }
+
+  ChatRecipeCard _chatRecipeCardFromPlan(PlannedMeal meal) {
+    return ChatRecipeCard(
+      recipeId: meal.recipeId ?? meal.id ?? meal.title.toLowerCase().replaceAll(' ', '-'),
+      title: meal.title,
+      subtitle: meal.description,
+      mealType: meal.mealType,
+      description: meal.description,
+      calories: meal.calories,
+      proteinGr: meal.proteinGr,
+      carbsGr: meal.carbsGr,
+      fatGr: meal.fatGr,
+      prepMinutes: meal.prepMinutes,
+      cookMinutes: meal.cookMinutes,
+      servings: meal.servings,
+      ingredients: meal.ingredients,
+      steps: meal.steps,
+    );
+  }
+
+  ChatMessage _localChatReply(String text) {
+    final lower = text.toLowerCase();
+    final progress = progressSnapshot;
+    final fasting = fastingSnapshot;
+    final remaining = progress.calorieTarget - progress.consumedCalories;
+    final proteinLeft = progress.macroTargets.proteinGr - progress.consumedMacros.proteinGr;
+
+    if (lower.contains('protein')) {
+      return ChatMessage(
+        role: ChatRole.assistant,
+        text: proteinLeft <= 0
+            ? 'Protein hedefini bugün doldurmuşsun. İstersen akşamı daha hafif ve dengeli tutacak bir seçenek çıkarayım.'
+            : 'Şu an protein hedefinde yaklaşık ${proteinLeft.clamp(0, 9999)} g boşluk var. Tavuk, yoğurt, yumurta veya baklagil iyi bir tamamlayıcı olur.',
+        suggestionChips: _defaultChatSuggestions(),
+        recipeCards: _defaultChatRecipes().take(2).toList(),
+        quickActions: const ['camera', 'voice', 'food-search'],
+        contextSummary: _chatContextHeadline(),
+      );
+    }
+
+    if (lower.contains('kaç kalori') || lower.contains('kalori')) {
+      return ChatMessage(
+        role: ChatRole.assistant,
+        text: 'Bugün hedefin ${progress.calorieTarget} kcal, şu ana kadar ${progress.consumedCalories} kcal aldın. Kalan yaklaşık ${remaining.clamp(0, 9999)} kcal. İstersen son öğününü de birlikte yorumlayayım.',
+        suggestionChips: _defaultChatSuggestions(),
+        recipeCards: _defaultChatRecipes().take(1).toList(),
+        quickActions: const ['camera', 'food-search'],
+        contextSummary: fasting.statusLabel,
+      );
+    }
+
+    if (lower.contains('hafif akşam') || lower.contains('akşam')) {
+      return ChatMessage(
+        role: ChatRole.assistant,
+        text: fasting.currentState == FastingStateLabel.active
+            ? 'Fasting planın aktif olduğu için akşamı çok ağır tutmadan kapatmak iyi olur. Hafif akşam önerilerini aşağıya bıraktım.'
+            : 'Bugün için hafif, dengeli ve yorucu olmayan birkaç akşam önerisi hazırladım.',
+        suggestionChips: _defaultChatSuggestions(),
+        recipeCards: _defaultChatRecipes()
+            .where((recipe) => recipe.mealType == MealType.dinner)
+            .toList(),
+        quickActions: const ['camera', 'voice', 'food-search'],
+        contextSummary: fasting.statusDetail,
+      );
+    }
+
+    return ChatMessage(
+      role: ChatRole.assistant,
+      text: 'Bugün hedefe yakın kalmak için yemekleri protein ağırlıklı ve sade tutmak iyi görünüyor. İstersen mevcut öğününü değerlendirip tek tek bakayım.',
+      suggestionChips: _defaultChatSuggestions(),
+      recipeCards: _defaultChatRecipes(),
+      quickActions: const ['camera', 'voice', 'food-search'],
+      contextSummary: _chatContextHeadline(),
+    );
+  }
+
+  String _chatContextHeadline() {
+    final summary = progressSnapshot;
+    final fasting = fastingSnapshot;
+    return '${summary.calorieTarget} kcal hedef • ${summary.consumedCalories} kcal tüketildi • ${fasting.statusLabel}';
+  }
+
+  Map<String, dynamic> _buildChatContextPayload() {
+    final summary = progressSnapshot;
+    final fasting = fastingSnapshot;
+    final recentMeals = meals.take(5).map(
+          (meal) => {
+            'id': meal.id,
+            'title': meal.title,
+            'mealType': meal.mealType.name,
+            'calories': meal.totalCalories,
+            'proteinGr': meal.macros.proteinGr,
+            'carbsGr': meal.macros.carbsGr,
+            'fatGr': meal.macros.fatGr,
+            'loggedAt': meal.createdAt.toIso8601String(),
+          },
+        )
+        .toList();
+
+    final planItems = dailyPlan.take(4).map(_chatRecipeCardFromPlan).map((card) => card.toMap()).toList();
+
+    return {
+      'dailyCaloriesTarget': dashboard.calorieTarget,
+      'todayConsumedCalories': dashboard.consumedCalories,
+      'todayRemainingCalories': dashboard.remainingCalories,
+      'macroTargets': {
+        'proteinGr': dashboard.macroTargets.proteinGr,
+        'carbsGr': dashboard.macroTargets.carbsGr,
+        'fatGr': dashboard.macroTargets.fatGr,
+      },
+      'consumedMacros': {
+        'proteinGr': dashboard.consumedMacros.proteinGr,
+        'carbsGr': dashboard.consumedMacros.carbsGr,
+        'fatGr': dashboard.consumedMacros.fatGr,
+      },
+      'progress': summary.toMap(),
+      'fasting': fasting.toMap(),
+      'activePlan': planItems,
+      'recentMeals': recentMeals,
+      'goal': user.selectedGoal.name,
+      'activityLevel': user.activityLevel.name,
+      'loggingPreference': user.preferredLoggingMethod.name,
+    };
   }
 
   Future<bool> startFastingSession() async {
@@ -1517,6 +1752,7 @@ class AppState extends ChangeNotifier {
     await _refreshDailyPlanFromBackend();
     await _refreshProgressSummary();
     await _refreshFastingState();
+    await _refreshChatThread();
   }
 
   void _applySessionToShell() {

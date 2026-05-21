@@ -46,6 +46,48 @@ class NutriSupabaseService {
     );
   }
 
+  Future<ChatThread> loadChatThread({
+    Map<String, dynamic>? context,
+  }) async {
+    final response = await client.functions.invoke(
+      'chat-thread',
+      method: HttpMethod.get,
+      queryParameters: {
+        if (context != null) 'context': jsonEncode(context),
+      },
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final thread = data['thread'];
+    if (thread is Map<String, dynamic>) {
+      return ChatThread.fromMap(thread);
+    }
+    return ChatThread.fromMap(data);
+  }
+
+  Future<ChatThread> sendChatMessage({
+    required String message,
+    String? threadId,
+    Map<String, dynamic>? context,
+  }) async {
+    final response = await client.functions.invoke(
+      'chat-message',
+      method: HttpMethod.post,
+      body: {
+        'message': message,
+        if (threadId != null) 'threadId': threadId,
+        if (context != null) 'context': context,
+      },
+      headers: _authHeaders,
+    );
+    final data = _asMap(response.data);
+    final thread = data['thread'];
+    if (thread is Map<String, dynamic>) {
+      return ChatThread.fromMap(thread);
+    }
+    return ChatThread.fromMap(data);
+  }
+
   Future<Map<String, dynamic>> analyzeText({
     required String text,
     required String mealType,
