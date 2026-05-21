@@ -94,6 +94,56 @@ class UserProfile {
   }
 }
 
+class NotificationPreferences {
+  NotificationPreferences({
+    this.permissionGranted = false,
+    this.waterReminders = true,
+    this.mealReminders = true,
+    this.fastingNotifications = true,
+    this.dailySummary = true,
+  });
+
+  final bool permissionGranted;
+  final bool waterReminders;
+  final bool mealReminders;
+  final bool fastingNotifications;
+  final bool dailySummary;
+
+  NotificationPreferences copyWith({
+    bool? permissionGranted,
+    bool? waterReminders,
+    bool? mealReminders,
+    bool? fastingNotifications,
+    bool? dailySummary,
+  }) {
+    return NotificationPreferences(
+      permissionGranted: permissionGranted ?? this.permissionGranted,
+      waterReminders: waterReminders ?? this.waterReminders,
+      mealReminders: mealReminders ?? this.mealReminders,
+      fastingNotifications: fastingNotifications ?? this.fastingNotifications,
+      dailySummary: dailySummary ?? this.dailySummary,
+    );
+  }
+
+  factory NotificationPreferences.fromMap(Map<String, dynamic> data) {
+    return NotificationPreferences(
+      permissionGranted: data['permissionGranted'] as bool? ?? false,
+      waterReminders: data['waterReminders'] as bool? ?? true,
+      mealReminders: data['mealReminders'] as bool? ?? true,
+      fastingNotifications: data['fastingNotifications'] as bool? ?? true,
+      dailySummary: data['dailySummary'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'permissionGranted': permissionGranted,
+        'waterReminders': waterReminders,
+        'mealReminders': mealReminders,
+        'fastingNotifications': fastingNotifications,
+        'dailySummary': dailySummary,
+      };
+}
+
 Goal goalFromDb(Object? value) => switch (value?.toString()) {
       'weight_loss' => Goal.weightLoss,
       'gain_muscle' => Goal.gainMuscle,

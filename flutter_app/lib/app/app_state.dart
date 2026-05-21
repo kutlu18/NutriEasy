@@ -51,6 +51,7 @@ class AppState extends ChangeNotifier {
   FastingSummary? fastingSummary;
   List<FastingSession> fastingHistory;
   List<String> foodSearchHistory = const [];
+  NotificationPreferences notificationPreferences = NotificationPreferences();
   ChatThread? chatThread;
   List<ChatSuggestionChip> chatSuggestionChips;
   List<ChatRecipeCard> chatRecipeCards;
@@ -147,6 +148,13 @@ class AppState extends ChangeNotifier {
     hasSeenWelcome = _storage!.hasSeenWelcome;
     mainTabIndex = _storage!.lastMainTabIndex;
     foodSearchHistory = List<String>.from(_storage!.foodSearchHistory);
+    notificationPreferences = NotificationPreferences(
+      permissionGranted: _storage!.notificationPermissionGranted,
+      waterReminders: _storage!.waterRemindersEnabled,
+      mealReminders: _storage!.mealRemindersEnabled,
+      fastingNotifications: _storage!.fastingNotificationsEnabled,
+      dailySummary: _storage!.dailySummaryEnabled,
+    );
 
     await Future<void>.delayed(const Duration(milliseconds: 650));
 
@@ -279,6 +287,7 @@ class AppState extends ChangeNotifier {
       fastingHistory = const [];
       chatThread = null;
       _resetChatLocalState();
+      notificationPreferences = NotificationPreferences();
       isLoadingProgress = false;
       isLoadingFasting = false;
       foodSearchHistory = const [];
@@ -359,17 +368,37 @@ class AppState extends ChangeNotifier {
 
   Future<void> completeOnboarding() async {
     user = user.copyWith(onboardingCompleted: true);
-    if (isAuthenticated) {
-      final response = await _service.refreshProfile(profile: user.toSupabaseMap());
-      final profileData = response['profile'];
-      if (profileData is Map<String, dynamic>) {
-        user = UserProfile.fromSupabase(profileData, email: user.email);
-      }
-      await _refreshFastingState();
-      await _refreshProgressSummary();
-    }
+    await _persistProfileAndRefresh();
 
     _applySessionToShell();
+    notifyListeners();
+  }
+
+  Future<void> saveAccountSettings(UserProfile profile) async {
+    user = profile.copyWith(onboardingCompleted: user.onboardingCompleted);
+    await _persistProfileAndRefresh();
+    notifyListeners();
+  }
+
+  Future<void> updateNotificationPreferences(NotificationPreferences preferences) async {
+    notificationPreferences = preferences;
+    if (_storage != null) {
+      await _storage!.setNotificationPermissionGranted(preferences.permissionGranted);
+      await _storage!.setWaterRemindersEnabled(preferences.waterReminders);
+      await _storage!.setMealRemindersEnabled(preferences.mealReminders);
+      await _storage!.setFastingNotificationsEnabled(preferences.fastingNotifications);
+      await _storage!.setDailySummaryEnabled(preferences.dailySummary);
+    }
+    AppAnalytics.instance.logEvent('notification_preferences_updated', parameters: preferences.toMap());
+    notifyListeners();
+  }
+
+  Future<void> requestNotificationPermission() async {
+    notificationPreferences = notificationPreferences.copyWith(permissionGranted: true);
+    if (_storage != null) {
+      await _storage!.setNotificationPermissionGranted(true);
+    }
+    AppAnalytics.instance.logEvent('notification_permission_granted');
     notifyListeners();
   }
 
@@ -1748,6 +1777,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> _hydrateAuthenticatedSession(Session session) async {
     await _syncProfileFromSession(session);
+    await _loadNotificationPreferences();
     await _refreshMealsFromBackend();
     await _refreshDailyPlanFromBackend();
     await _refreshProgressSummary();
@@ -1777,6 +1807,30 @@ class AppState extends ChangeNotifier {
       4 => 'profile',
       _ => 'main',
     };
+  }
+
+  Future<void> _persistProfileAndRefresh() async {
+    if (isAuthenticated) {
+      final response = await _service.refreshProfile(profile: user.toSupabaseMap());
+      final profileData = response['profile'];
+      if (profileData is Map<String, dynamic>) {
+        user = UserProfile.fromSupabase(profileData, email: user.email);
+      }
+      await _refreshFastingState();
+      await _refreshProgressSummary();
+      await _refreshChatThread();
+    }
+  }
+
+  Future<void> _loadNotificationPreferences() async {
+    if (_storage == null) return;
+    notificationPreferences = NotificationPreferences(
+      permissionGranted: _storage!.notificationPermissionGranted,
+      waterReminders: _storage!.waterRemindersEnabled,
+      mealReminders: _storage!.mealRemindersEnabled,
+      fastingNotifications: _storage!.fastingNotificationsEnabled,
+      dailySummary: _storage!.dailySummaryEnabled,
+    );
   }
 
   MealAnalysis _analysisFromResponse(
