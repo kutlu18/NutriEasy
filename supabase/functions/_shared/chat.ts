@@ -2,6 +2,7 @@ import { serviceClient } from "./auth.ts";
 import { loadProgressSummary } from "./progress.ts";
 import { loadFastingSummary } from "./fasting.ts";
 import { createDailyPlan, getRecipeById, type CatalogRecipe } from "./plan_catalog.ts";
+import { promptRegistry } from "./ai/prompts.ts";
 
 type Goal = "weight_loss" | "gain_muscle" | "maintain" | "fasting";
 type ActivityLevel = "sedentary" | "light" | "moderate" | "active";
@@ -173,6 +174,19 @@ function buildContextSummary(context: ChatContext) {
   return `${progress.calorieTarget} kcal hedef • ${progress.consumedCalories} kcal tüketildi • ${fasting.statusLabel}`;
 }
 
+function nuriMeta() {
+  const prompt = promptRegistry.nuriChat;
+  return {
+    model: prompt.model,
+    prompt_id: prompt.id,
+    prompt_version: prompt.version,
+    provider: "heuristic",
+    latency_ms: 0,
+    confidence: "medium",
+    fallback_used: true,
+  };
+}
+
 function buildRecipeCardsForIntent(intent: string, context: ChatContext): ChatRecipeCard[] {
   const plan = createDailyPlan();
   const dinner = getRecipeById("recipe-light-dinner");
@@ -271,7 +285,7 @@ function replyForIntent(intent: string, message: string, context: ChatContext) {
       };
     case "today":
       return {
-        text: `Bugün için hedefe en yakın yaklaşım, ${progress.remainingMinutes ? "kalori dengesini koruyup" : ""} protein ağırlıklı ve sade öğünlerle ilerlemek. ${fasting.statusLabel} durumuna göre pencereni de dikkate alacağım.`,
+        text: `Bugün için hedefe en yakın yaklaşım, ${progress.calorieBalance > 0 ? "kalori dengesini koruyup" : ""} protein ağırlıklı ve sade öğünlerle ilerlemek. ${fasting.statusLabel} durumuna göre pencereni de dikkate alacağım.`,
         recipeCards: buildRecipeCardsForIntent("today", context),
       };
     case "balance":
@@ -392,7 +406,7 @@ async function buildContext(userId: string, user: { id: string; app_metadata?: R
   const profile = await getProfile(userId);
   const [progress, fasting, recentMeals] = await Promise.all([
     loadProgressSummary(userId),
-    loadFastingSummary(user, profile),
+    loadFastingSummary({ ...user, app_metadata: user.app_metadata ?? undefined }, profile),
     getRecentMeals(userId),
   ]);
 
@@ -443,7 +457,7 @@ export async function loadChatThread(userId: string, clientContext?: Record<stri
   };
 
   await persistThread(userId, starterThread);
-  return { thread: starterThread, context };
+  return { thread: starterThread, context, meta: nuriMeta() };
 }
 
 export async function sendChatMessage(userId: string, message: string, clientContext?: Record<string, unknown>) {
@@ -469,5 +483,5 @@ export async function sendChatMessage(userId: string, message: string, clientCon
   };
 
   await persistThread(userId, updatedThread);
-  return { thread: updatedThread, context };
+  return { thread: updatedThread, context, meta: nuriMeta() };
 }
