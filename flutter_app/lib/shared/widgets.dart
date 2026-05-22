@@ -25,15 +25,108 @@ class PrimaryButton extends StatelessWidget {
             ? const SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
               )
             : Icon(icon ?? Icons.arrow_forward),
         label: Text(title),
         style: FilledButton.styleFrom(
           backgroundColor: NutriColors.leaf,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size.fromHeight(56),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          textStyle: Theme.of(context).textTheme.titleMedium,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        ),
+      ),
+    );
+  }
+}
+
+class NutriCard extends StatelessWidget {
+  const NutriCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(20),
+    this.color = NutriColors.surface,
+    this.radius = 24,
+    this.onTap,
+    this.borderColor,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Color color;
+  final double radius;
+  final VoidCallback? onTap;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+        border: borderColor == null ? null : Border.all(color: borderColor!),
+        boxShadow: const [NutriColors.cardShadow],
+      ),
+      child: child,
+    );
+
+    if (onTap == null) return content;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(radius),
+      child: content,
+    );
+  }
+}
+
+class NutriLogoMark extends StatelessWidget {
+  const NutriLogoMark({
+    super.key,
+    this.size = 92,
+    this.showShadow = true,
+  });
+
+  final double size;
+  final bool showShadow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF276F69), NutriColors.leaf],
+        ),
+        borderRadius: BorderRadius.circular(size * 0.24),
+        border: Border.all(color: Colors.white, width: size * 0.08),
+        boxShadow: showShadow
+            ? const [
+                BoxShadow(
+                    color: Color(0x22004D40),
+                    blurRadius: 28,
+                    offset: Offset(0, 12)),
+              ]
+            : null,
+      ),
+      child: Center(
+        child: Container(
+          width: size * 0.52,
+          height: size * 0.52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: size * 0.045),
+          ),
+          child: Icon(Icons.add, color: Colors.white, size: size * 0.34),
         ),
       ),
     );
@@ -61,14 +154,22 @@ class MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: tint.withOpacity(0.14),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: NutriColors.muted)),
+          Text(title,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(color: NutriColors.muted)),
           const SizedBox(height: 6),
-          Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: NutriColors.ink)),
+          Text(value,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: NutriColors.ink)),
           const SizedBox(height: 4),
           Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
         ],
@@ -97,8 +198,10 @@ class SelectionTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: NutriColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: selected ? NutriColors.leaf : Colors.black12),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: selected ? NutriColors.leaf : const Color(0xFFE3E2E0)),
+        boxShadow: const [NutriColors.cardShadow],
       ),
       child: Row(
         children: [
@@ -106,10 +209,11 @@ class SelectionTile extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: selected ? NutriColors.leaf : NutriColors.mint,
-              borderRadius: BorderRadius.circular(8),
+              color: selected ? NutriColors.leaf : NutriColors.mintSoft,
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: selected ? Colors.white : NutriColors.leaf, size: 20),
+            child: Icon(icon,
+                color: selected ? Colors.white : NutriColors.leaf, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -152,14 +256,19 @@ class InlineMessage extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: foregroundColor),
           const SizedBox(width: 8),
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: foregroundColor))),
+          Expanded(
+              child: Text(text,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: foregroundColor))),
         ],
       ),
     );
@@ -167,7 +276,8 @@ class InlineMessage extends StatelessWidget {
 }
 
 class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key, required this.title, this.actionLabel, this.onAction});
+  const SectionHeader(
+      {super.key, required this.title, this.actionLabel, this.onAction});
 
   final String title;
   final String? actionLabel;
@@ -215,10 +325,13 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(subtitle, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
+            Text(subtitle,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 12),
-              PrimaryButton(title: actionLabel!, onPressed: onAction, icon: Icons.add),
+              PrimaryButton(
+                  title: actionLabel!, onPressed: onAction, icon: Icons.add),
             ],
           ],
         ),
