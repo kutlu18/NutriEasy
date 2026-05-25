@@ -1,10 +1,7 @@
 // meal_logging_sheet.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
-import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
@@ -20,7 +17,6 @@ void showMealLoggingSheet(BuildContext context) {
     builder: (_) => const _MealLoggingSheet(),
   );
 }
-
 
 class _MealLoggingSheet extends StatelessWidget {
   const _MealLoggingSheet();
@@ -114,7 +110,6 @@ class _MealLoggingSheet extends StatelessWidget {
   }
 }
 
-
 class _EntryModeTile extends StatelessWidget {
   const _EntryModeTile({
     required this.icon,
@@ -171,5 +166,4 @@ class _EntryModeTile extends StatelessWidget {
     );
   }
 }
-
 

@@ -1,11 +1,7 @@
 // correction_view.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
-import '../../core/models.dart';
-import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
 class CorrectionView extends StatefulWidget {
@@ -14,7 +10,6 @@ class CorrectionView extends StatefulWidget {
   @override
   State<CorrectionView> createState() => _CorrectionViewState();
 }
-
 
 class _CorrectionViewState extends State<CorrectionView> {
   final controller = TextEditingController();
@@ -107,5 +102,4 @@ class _CorrectionViewState extends State<CorrectionView> {
     );
   }
 }
-
 

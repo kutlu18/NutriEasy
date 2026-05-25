@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
 import '../../core/models.dart';
-import '../../shared/design_system.dart';
-import '../../shared/widgets.dart';
-
 import 'meal_analysis_view.dart';
 
 class MealProcessingView extends StatefulWidget {
@@ -27,7 +24,6 @@ class MealProcessingView extends StatefulWidget {
   @override
   State<MealProcessingView> createState() => _MealProcessingViewState();
 }
-
 
 class _MealProcessingViewState extends State<MealProcessingView> {
   bool _started = false;
@@ -138,5 +134,4 @@ class _MealProcessingViewState extends State<MealProcessingView> {
     );
   }
 }
-
 

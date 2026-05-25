@@ -58,7 +58,7 @@ Future<void> showMealItemEditSheet(
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _RoundStepButton(
+                    RoundStepButton(
                       icon: Icons.remove,
                       onTap: () {
                         setSheetState(() {
@@ -79,7 +79,7 @@ Future<void> showMealItemEditSheet(
                       ],
                     ),
                     const SizedBox(width: 16),
-                    _RoundStepButton(
+                    RoundStepButton(
                       icon: Icons.add,
                       onTap: () {
                         setSheetState(() {
@@ -133,24 +133,24 @@ Future<void> showMealItemEditSheet(
                   child: Row(
                     children: [
                       Expanded(
-                          child: _MealStat(
+                          child: MealStat(
                               title: 'Kalori',
                               value: '$calories',
                               unit: 'kcal')),
                       Container(
                           width: 1, height: 36, color: const Color(0xFFE6E1EE)),
                       Expanded(
-                          child: _MealStat(
+                          child: MealStat(
                               title: 'Protein', value: '$protein', unit: 'g')),
                       Container(
                           width: 1, height: 36, color: const Color(0xFFE6E1EE)),
                       Expanded(
-                          child: _MealStat(
+                          child: MealStat(
                               title: 'Karb.', value: '$carbs', unit: 'g')),
                       Container(
                           width: 1, height: 36, color: const Color(0xFFE6E1EE)),
                       Expanded(
-                          child: _MealStat(
+                          child: MealStat(
                               title: 'Yag', value: '$fat', unit: 'g')),
                     ],
                   ),
@@ -274,3 +274,74 @@ class MealItemRow extends StatelessWidget {
 }
 
 
+
+/// Daire şeklinde, dark-mode'daki + / − butonu.
+/// Portion edit ve item edit sheet ikisi de kullanır.
+class RoundStepButton extends StatelessWidget {
+  const RoundStepButton({super.key, required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1E),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFF2A2A2E)),
+        ),
+        child: Icon(icon, color: Colors.white),
+      ),
+    );
+  }
+}
+
+/// Dark-mode analiz/detail ekranında etiket + büyük rakam + birim göstergesi.
+/// MealDetailView ve item edit sheet ikisi de kullanır.
+class MealStat extends StatelessWidget {
+  const MealStat(
+      {super.key,
+      required this.title,
+      required this.value,
+      required this.unit});
+
+  final String title;
+  final String value;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: const Color(0xFF8A8A93))),
+        const SizedBox(height: 6),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text: value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w800)),
+              TextSpan(
+                  text: unit,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: const Color(0xFF8A8A93))),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

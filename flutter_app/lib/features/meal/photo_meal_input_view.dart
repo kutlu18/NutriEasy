@@ -1,13 +1,10 @@
 // photo_meal_input_view.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-import '../../app/app_scope.dart';
 import '../../core/models.dart';
-import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
+import 'meal_logging_sheet.dart';
 import 'meal_processing_view.dart';
 
 class PhotoMealInputView extends StatefulWidget {
@@ -16,7 +13,6 @@ class PhotoMealInputView extends StatefulWidget {
   @override
   State<PhotoMealInputView> createState() => _PhotoMealInputViewState();
 }
-
 
 class _PhotoMealInputViewState extends State<PhotoMealInputView> {
   MealType mealType = MealType.lunch;
@@ -178,7 +174,6 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
   }
 }
 
-
 class _PhotoBadge extends StatelessWidget {
   const _PhotoBadge({
     required this.text,
@@ -212,5 +207,4 @@ class _PhotoBadge extends StatelessWidget {
     );
   }
 }
-
 

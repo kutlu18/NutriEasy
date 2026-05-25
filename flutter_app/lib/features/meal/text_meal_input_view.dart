@@ -1,6 +1,4 @@
 // text_meal_input_view.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
@@ -8,6 +6,7 @@ import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
+import 'meal_logging_sheet.dart';
 import 'meal_processing_view.dart';
 
 class TextMealInputView extends StatefulWidget {
@@ -16,7 +15,6 @@ class TextMealInputView extends StatefulWidget {
   @override
   State<TextMealInputView> createState() => _TextMealInputViewState();
 }
-
 
 class _TextMealInputViewState extends State<TextMealInputView> {
   final textController = TextEditingController();
@@ -155,7 +153,6 @@ class _TextMealInputViewState extends State<TextMealInputView> {
   }
 }
 
-
 class _QuickPillRow extends StatelessWidget {
   const _QuickPillRow({required this.onTap});
 
@@ -195,7 +192,6 @@ class _QuickPillRow extends StatelessWidget {
   }
 }
 
-
 class _HowItWorksCard extends StatelessWidget {
   const _HowItWorksCard({required this.title, required this.subtitle});
 
@@ -225,5 +221,4 @@ class _HowItWorksCard extends StatelessWidget {
     );
   }
 }
-
 

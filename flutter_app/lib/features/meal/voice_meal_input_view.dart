@@ -3,9 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../app/app_scope.dart';
 import '../../core/models.dart';
-import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
 import 'meal_processing_view.dart';
@@ -16,7 +14,6 @@ class VoiceMealInputView extends StatefulWidget {
   @override
   State<VoiceMealInputView> createState() => _VoiceMealInputViewState();
 }
-
 
 class _VoiceMealInputViewState extends State<VoiceMealInputView> {
   MealType mealType = MealType.breakfast;
@@ -166,5 +163,4 @@ class _VoiceMealInputViewState extends State<VoiceMealInputView> {
     );
   }
 }
-
 

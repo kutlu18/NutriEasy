@@ -1,12 +1,10 @@
 // portion_edit_view.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
 import '../../core/models.dart';
-import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
+import 'meal_item_row.dart';
 
 class PortionEditView extends StatefulWidget {
   const PortionEditView({super.key});
@@ -14,7 +12,6 @@ class PortionEditView extends StatefulWidget {
   @override
   State<PortionEditView> createState() => _PortionEditViewState();
 }
-
 
 class _PortionEditViewState extends State<PortionEditView> {
   double multiplier = 1.0;
@@ -118,7 +115,7 @@ class _PortionEditViewState extends State<PortionEditView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _RoundStepButton(
+                    RoundStepButton(
                       icon: Icons.remove,
                       onTap: () => setState(() =>
                           multiplier = (multiplier - 0.1).clamp(0.5, 2.0)),
@@ -144,7 +141,7 @@ class _PortionEditViewState extends State<PortionEditView> {
                       ],
                     ),
                     const SizedBox(width: 16),
-                    _RoundStepButton(
+                    RoundStepButton(
                       icon: Icons.add,
                       onTap: () => setState(() =>
                           multiplier = (multiplier + 0.1).clamp(0.5, 2.0)),
@@ -184,33 +181,6 @@ class _PortionEditViewState extends State<PortionEditView> {
     );
   }
 }
-
-
-class _RoundStepButton extends StatelessWidget {
-  const _RoundStepButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1E),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF2A2A2E)),
-        ),
-        child: Icon(icon, color: Colors.white),
-      ),
-    );
-  }
-}
-
 
 class _MiniPortionRow extends StatelessWidget {
   const _MiniPortionRow({required this.item, required this.multiplier});

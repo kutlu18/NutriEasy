@@ -1,6 +1,4 @@
 // meal_analysis_view.dart — split from meal_view.dart for clarity.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
@@ -321,7 +319,6 @@ class MealAnalysisView extends StatelessWidget {
   }
 }
 
-
 class _StatusPill extends StatelessWidget {
   const _StatusPill({
     required this.icon,
@@ -362,7 +359,6 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-
 class _MacroBlock extends StatelessWidget {
   const _MacroBlock({required this.label, required this.value});
 
@@ -388,5 +384,4 @@ class _MacroBlock extends StatelessWidget {
     );
   }
 }
-
 
