@@ -185,51 +185,73 @@ class SelectionTile extends StatelessWidget {
     required this.selected,
     required this.icon,
     this.subtitle,
+    this.comingSoon = false,
   });
 
   final String title;
   final String? subtitle;
   final IconData icon;
   final bool selected;
+  final bool comingSoon;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: NutriColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: selected ? NutriColors.leaf : const Color(0xFFE3E2E0)),
-        boxShadow: const [NutriColors.cardShadow],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: selected ? NutriColors.leaf : NutriColors.mintSoft,
-              borderRadius: BorderRadius.circular(16),
+    final disabled = comingSoon;
+    return Opacity(
+      opacity: disabled ? 0.55 : 1.0,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: NutriColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+              color: selected ? NutriColors.leaf : const Color(0xFFE3E2E0)),
+          boxShadow: const [NutriColors.cardShadow],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: selected ? NutriColors.leaf : NutriColors.mintSoft,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon,
+                  color: selected ? Colors.white : NutriColors.leaf, size: 20),
             ),
-            child: Icon(icon,
-                color: selected ? Colors.white : NutriColors.leaf, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleMedium),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleMedium),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle!,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          if (selected) const Icon(Icons.check_circle, color: NutriColors.leaf),
-        ],
+            if (comingSoon)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: NutriColors.surfaceHigh,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Yakında',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: NutriColors.muted, fontWeight: FontWeight.w700),
+                ),
+              )
+            else if (selected)
+              const Icon(Icons.check_circle, color: NutriColors.leaf),
+          ],
+        ),
       ),
     );
   }

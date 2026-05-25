@@ -10,10 +10,10 @@ class UserProfile {
     this.age = 30,
     this.heightCm = 175,
     this.weightKg = 78,
-    this.targetWeightKg = 72,
+    this.targetWeightKg,
     this.selectedGoal = Goal.weightLoss,
     this.activityLevel = ActivityLevel.light,
-    this.preferredLoggingMethod = LoggingMethod.mixed,
+    this.preferredLoggingMethod = LoggingMethod.text,
     this.onboardingCompleted = false,
   });
 
