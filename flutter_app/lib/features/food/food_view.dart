@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
-import '../../core/mock_data.dart';
 import '../../core/models.dart';
 import '../../core/services/nutri_supabase_service.dart';
 import '../../shared/design_system.dart';
@@ -82,22 +81,30 @@ Future<void> showFoodProductSheet(
                             color: const Color(0xFFDDEFE6),
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: const Icon(Icons.restaurant_outlined, color: NutriColors.leaf),
+                          child: const Icon(Icons.restaurant_outlined,
+                              color: NutriColors.leaf),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(food.name, style: Theme.of(context).textTheme.titleLarge),
+                              Text(food.name,
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
                               if ((food.brand ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 4),
-                                Text(food.brand!, style: Theme.of(context).textTheme.bodySmall),
+                                Text(food.brand!,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
                               ],
                               const SizedBox(height: 8),
                               Text(
                                 selectedServing.label,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(color: NutriColors.muted),
                               ),
                             ],
                           ),
@@ -112,7 +119,8 @@ Future<void> showFoodProductSheet(
                       fat: totalFat,
                     ),
                     const SizedBox(height: 18),
-                    Text('Porsiyon', style: Theme.of(context).textTheme.titleMedium),
+                    Text('Porsiyon',
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
@@ -122,24 +130,29 @@ Future<void> showFoodProductSheet(
                             (serving) => ChoiceChip(
                               label: Text(serving.label),
                               selected: serving == selectedServing,
-                              onSelected: (_) => setModalState(() => selectedServing = serving),
+                              onSelected: (_) => setModalState(
+                                  () => selectedServing = serving),
                             ),
                           )
                           .toList(),
                     ),
                     const SizedBox(height: 18),
-                    Text('Miktar', style: Theme.of(context).textTheme.titleMedium),
+                    Text('Miktar',
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     _QuantityStepper(
                       value: quantity,
-                      onChanged: (nextValue) => setModalState(() => quantity = nextValue),
+                      onChanged: (nextValue) =>
+                          setModalState(() => quantity = nextValue),
                     ),
                     const SizedBox(height: 18),
-                    Text('Ogun tipi', style: Theme.of(context).textTheme.titleMedium),
+                    Text('Ogun tipi',
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     _MealTypeSelector(
                       selected: mealType,
-                      onChanged: (value) => setModalState(() => mealType = value),
+                      onChanged: (value) =>
+                          setModalState(() => mealType = value),
                     ),
                     const SizedBox(height: 18),
                     PrimaryButton(
@@ -191,25 +204,31 @@ class FoodHubView extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              Text('Urun ara ve ekle', style: Theme.of(context).textTheme.headlineLarge),
+              Text('Urun ara ve ekle',
+                  style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
                 'Manuel ogun girişi, hizli ekleme ve urun detayi tek alanda.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: NutriColors.muted),
               ),
               const SizedBox(height: 16),
               _ShortcutCard(
                 title: 'Food search',
                 subtitle: 'Besin veritabaninda ara',
                 icon: Icons.search,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoodSearchView())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const FoodSearchView())),
               ),
               const SizedBox(height: 10),
               _ShortcutCard(
                 title: 'Quick add',
                 subtitle: 'Populer urunleri tek dokunusla ekle',
                 icon: Icons.add_circle_outline,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuickAddView())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const QuickAddView())),
               ),
               if (history.isNotEmpty) ...[
                 const SizedBox(height: 18),
@@ -224,7 +243,8 @@ class FoodHubView extends StatelessWidget {
                           label: Text(item),
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => FoodSearchView(initialQuery: item),
+                              builder: (_) =>
+                                  FoodSearchView(initialQuery: item),
                             ),
                           ),
                         ),
@@ -236,13 +256,15 @@ class FoodHubView extends StatelessWidget {
               SectionHeader(
                 title: 'Populer urunler',
                 actionLabel: 'Gozat',
-                onAction: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FoodSearchView())),
+                onAction: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const FoodSearchView())),
               ),
               const SizedBox(height: 10),
               if (popular.isEmpty)
                 const EmptyState(
                   title: 'Henuz populer urun yok',
-                  subtitle: 'Ogunler kaydedildikce sik kullanilan urunler burada gorunur.',
+                  subtitle:
+                      'Ogunler kaydedildikce sik kullanilan urunler burada gorunur.',
                   icon: Icons.local_fire_department_outlined,
                 )
               else
@@ -420,13 +442,15 @@ class _FoodSearchViewState extends State<FoodSearchView> {
             SectionHeader(
               title: 'Populer urunler',
               actionLabel: 'Hizli ekle',
-              onAction: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QuickAddView())),
+              onAction: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const QuickAddView())),
             ),
             const SizedBox(height: 10),
             if (popular.isEmpty)
               const EmptyState(
                 title: 'Henuz urun yok',
-                subtitle: 'Kaydedilen ogunler burada populer urunlere donusecek.',
+                subtitle:
+                    'Kaydedilen ogunler burada populer urunlere donusecek.',
                 icon: Icons.local_fire_department_outlined,
               )
             else
@@ -449,7 +473,8 @@ class _FoodSearchViewState extends State<FoodSearchView> {
             if (_results.isEmpty && !_isLoading)
               const EmptyState(
                 title: 'Sonuc yok',
-                subtitle: 'Baska bir urun adi deneyin ya da populer urunleri kullanin.',
+                subtitle:
+                    'Baska bir urun adi deneyin ya da populer urunleri kullanin.',
                 icon: Icons.search_off,
               )
             else
@@ -486,39 +511,30 @@ class QuickAddView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Bir urune dokun, miktari sec ve gunune kaydet.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: NutriColors.muted),
           ),
           const SizedBox(height: 16),
           if (popular.isEmpty)
             const EmptyState(
               title: 'Henuz populer urun yok',
-              subtitle: 'Birkac ogun kaydettikten sonra hizli ekleme onerileri buraya gelir.',
+              subtitle:
+                  'Birkac ogun kaydettikten sonra hizli ekleme onerileri buraya gelir.',
               icon: Icons.add_circle_outline,
             )
           else
             ...popular.take(8).map(
-              (food) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _QuickAddCard(
-                  food: food,
-                  onTap: () => showFoodProductSheet(context, food, initialMealType: MealType.snack),
+                  (food) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _QuickAddCard(
+                      food: food,
+                      onTap: () => showFoodProductSheet(context, food,
+                          initialMealType: MealType.snack),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          if (MockData.quickAdd.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            SectionHeader(title: 'Baslangic onerileri'),
-            const SizedBox(height: 10),
-            ...MockData.quickAdd.map(
-              (food) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _QuickAddCard(
-                  food: food,
-                  onTap: () => showFoodProductSheet(context, food, initialMealType: MealType.snack),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -547,7 +563,8 @@ class _FoodSearchResultTile extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Row(
@@ -559,17 +576,20 @@ class _FoodSearchResultTile extends StatelessWidget {
                 color: const Color(0xFFDDEFE6),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.restaurant_outlined, color: NutriColors.leaf),
+              child: const Icon(Icons.restaurant_outlined,
+                  color: NutriColors.leaf),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(food.name, style: Theme.of(context).textTheme.titleMedium),
+                  Text(food.name,
+                      style: Theme.of(context).textTheme.titleMedium),
                   if ((food.brand ?? '').isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(food.brand!, style: Theme.of(context).textTheme.bodySmall),
+                    Text(food.brand!,
+                        style: Theme.of(context).textTheme.bodySmall),
                   ],
                   const SizedBox(height: 4),
                   Text(
@@ -585,7 +605,10 @@ class _FoodSearchResultTile extends StatelessWidget {
               children: [
                 Text(
                   serving?.label ?? '1 serving',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NutriColors.muted),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: NutriColors.muted),
                   textAlign: TextAlign.end,
                 ),
                 const SizedBox(height: 8),
@@ -621,7 +644,8 @@ class _QuickAddCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Row(
@@ -633,14 +657,16 @@ class _QuickAddCard extends StatelessWidget {
                 color: const Color(0xFFD0EBD6),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.flash_on_outlined, color: NutriColors.leaf),
+              child:
+                  const Icon(Icons.flash_on_outlined, color: NutriColors.leaf),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(food.name, style: Theme.of(context).textTheme.titleMedium),
+                  Text(food.name,
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(
                     '${serving?.calories ?? food.calories} kcal | quick add',
@@ -680,7 +706,8 @@ class _PopularFoodCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Column(
@@ -705,7 +732,10 @@ class _PopularFoodCard extends StatelessWidget {
             const Spacer(),
             Text(
               '${serving?.calories ?? food.calories} kcal',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.leaf),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: NutriColors.leaf),
             ),
             const SizedBox(height: 4),
             Text(
@@ -817,13 +847,16 @@ class _QuantityStepper extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: value > 0.5 ? () => onChanged((value - 0.5).clamp(0.5, 20)) : null,
+            onPressed: value > 0.5
+                ? () => onChanged((value - 0.5).clamp(0.5, 20))
+                : null,
             icon: const Icon(Icons.remove_circle_outline),
           ),
           Expanded(
             child: Column(
               children: [
-                Text(_formatQuantity(value), style: Theme.of(context).textTheme.titleLarge),
+                Text(_formatQuantity(value),
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 2),
                 Text('servings', style: Theme.of(context).textTheme.bodySmall),
               ],
@@ -899,7 +932,8 @@ class _ShortcutCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
-            BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 8)),
           ],
         ),
         child: Row(

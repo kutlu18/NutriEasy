@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/analytics/app_analytics.dart';
+import '../core/config/app_config.dart';
 import '../core/errors/app_error_parser.dart';
 import '../core/logging/app_logger.dart';
 import '../core/mock_data.dart';
@@ -15,8 +16,12 @@ import '../core/storage/app_local_storage.dart';
 class AppState extends ChangeNotifier {
   AppState()
       : user = UserProfile(),
-        meals = List<Meal>.from(MockData.meals),
-        dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals),
+        meals = AppConfig.demoContentEnabled
+            ? List<Meal>.from(MockData.meals)
+            : <Meal>[],
+        dailyPlan = AppConfig.demoContentEnabled
+            ? List<PlannedMeal>.from(MockData.plannedMeals)
+            : <PlannedMeal>[],
         fastingHistory = const [],
         chatSuggestionChips = const [],
         chatRecipeCards = const [],
@@ -114,6 +119,16 @@ class AppState extends ChangeNotifier {
       };
 
   bool get isPremiumUser => subscriptionState.active;
+
+  bool get demoContentEnabled => AppConfig.demoContentEnabled;
+
+  bool get photoMealInputEnabled => AppConfig.photoMealInputEnabled;
+
+  bool get voiceMealInputEnabled => AppConfig.voiceMealInputEnabled;
+
+  bool get premiumCheckoutEnabled => AppConfig.premiumCheckoutEnabled;
+
+  bool get pushNotificationsEnabled => AppConfig.pushNotificationsEnabled;
 
   bool get canAccessWeeklyPlan => subscriptionState.hasWeeklyPlanAccess;
 
@@ -312,8 +327,12 @@ class AppState extends ChangeNotifier {
       accessToken = null;
       selectedAnalysis = null;
       mainTabIndex = 0;
-      meals = List<Meal>.from(MockData.meals);
-      dailyPlan = List<PlannedMeal>.from(MockData.plannedMeals);
+      meals = AppConfig.demoContentEnabled
+          ? List<Meal>.from(MockData.meals)
+          : <Meal>[];
+      dailyPlan = AppConfig.demoContentEnabled
+          ? List<PlannedMeal>.from(MockData.plannedMeals)
+          : <PlannedMeal>[];
       progressSummary = null;
       fastingSummary = null;
       fastingHistory = const [];
@@ -365,7 +384,7 @@ class AppState extends ChangeNotifier {
     final popular = counts.values.toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
-    if (popular.isEmpty) {
+    if (popular.isEmpty && AppConfig.demoContentEnabled) {
       return MockData.quickAdd;
     }
 
@@ -431,6 +450,13 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> requestNotificationPermission() async {
+    if (!AppConfig.pushNotificationsEnabled) {
+      errorMessage =
+          'Bildirim entegrasyonu henuz aktif degil. Tercihlerin kaydedilebilir, ancak cihaz bildirimi gonderilmeyecek.';
+      notifyListeners();
+      return;
+    }
+
     notificationPreferences =
         notificationPreferences.copyWith(permissionGranted: true);
     if (_storage != null) {
@@ -441,6 +467,13 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> purchasePremium(SubscriptionPlan plan) async {
+    if (!AppConfig.premiumCheckoutEnabled) {
+      errorMessage =
+          'Premium odeme henuz aktif degil. Bu ekran su an sadece on izleme olarak kullaniliyor.';
+      notifyListeners();
+      return;
+    }
+
     final now = DateTime.now();
     final renewsAt = switch (plan) {
       SubscriptionPlan.monthly => now.add(const Duration(days: 30)),
@@ -522,7 +555,7 @@ class AppState extends ChangeNotifier {
           sourceType: sourceType,
           sourceLabel: sourceLabel ?? text,
         );
-      } else {
+      } else if (AppConfig.demoContentEnabled) {
         final fallback = MockData.analysis;
         selectedAnalysis = MealAnalysis(
           mealType: mealType,
@@ -534,21 +567,13 @@ class AppState extends ChangeNotifier {
           sourceLabel: sourceLabel ?? text,
           warnings: const ['Demo modunda ornek analiz gosteriliyor.'],
         );
+      } else {
+        selectedAnalysis = null;
+        errorMessage =
+            'Canli analiz icin giris yapmalisin. Istersen food search ile manuel ekleyebilirsin.';
       }
     } catch (error) {
-      final fallback = MockData.analysis;
-      selectedAnalysis = MealAnalysis(
-        mealType: mealType,
-        confidence: fallback.confidence,
-        totalCalories: fallback.totalCalories,
-        macros: fallback.macros,
-        detectedItems: fallback.detectedItems,
-        sourceType: sourceType,
-        sourceLabel: sourceLabel ?? text,
-        warnings: const [
-          'Canli analiz calismadi. Simdilik ornek analiz gosteriliyor.'
-        ],
-      );
+      selectedAnalysis = null;
       errorMessage = AppErrorParser.message(error);
       AppLogger.error('Meal analysis failed', error: error);
     } finally {
@@ -561,6 +586,14 @@ class AppState extends ChangeNotifier {
     required String sourceLabel,
     required MealType mealType,
   }) async {
+    if (!AppConfig.photoMealInputEnabled) {
+      selectedAnalysis = null;
+      errorMessage =
+          'Fotografla analiz henuz aktif degil. Simdilik en guvenilir akis yazarak ogun eklemek.';
+      notifyListeners();
+      return;
+    }
+
     final label = sourceLabel.trim();
     if (label.isEmpty) {
       errorMessage = 'Foto analiz icin kisa bir aciklama gerekli.';
@@ -590,7 +623,7 @@ class AppState extends ChangeNotifier {
           sourceType: MealSourceType.photo,
           sourceLabel: sourceLabel,
         );
-      } else {
+      } else if (AppConfig.demoContentEnabled) {
         final fallback = MockData.analysis;
         selectedAnalysis = MealAnalysis(
           mealType: mealType,
@@ -604,21 +637,13 @@ class AppState extends ChangeNotifier {
             'Demo modunda foto analiz ornek sonucu gosteriliyor.'
           ],
         );
+      } else {
+        selectedAnalysis = null;
+        errorMessage =
+            'Canli foto analiz icin giris yapmalisin. Simdilik yazarak ekleyebilirsin.';
       }
     } catch (error) {
-      final fallback = MockData.analysis;
-      selectedAnalysis = MealAnalysis(
-        mealType: mealType,
-        confidence: fallback.confidence,
-        totalCalories: fallback.totalCalories,
-        macros: fallback.macros,
-        detectedItems: fallback.detectedItems,
-        sourceType: MealSourceType.photo,
-        sourceLabel: sourceLabel,
-        warnings: const [
-          'Canli foto analiz calismadi. Simdilik ornek analiz gosteriliyor.'
-        ],
-      );
+      selectedAnalysis = null;
       errorMessage = AppErrorParser.message(error);
       AppLogger.error('Photo meal analysis failed', error: error);
     } finally {
@@ -631,6 +656,14 @@ class AppState extends ChangeNotifier {
     required String transcript,
     required MealType mealType,
   }) async {
+    if (!AppConfig.voiceMealInputEnabled) {
+      selectedAnalysis = null;
+      errorMessage =
+          'Sesle ogun girisi henuz aktif degil. Simdilik metin akisini kullanabilirsin.';
+      notifyListeners();
+      return;
+    }
+
     await analyzeMeal(
       source: transcript,
       mealType: mealType,
@@ -1303,7 +1336,7 @@ class AppState extends ChangeNotifier {
             'Merhaba, ben Nuri. Bugün ne yemeliyim, proteinim yeterli mi ya da hafif akşam öner gibi sorularla yardımcı olabilirim.',
         suggestionChips: _defaultChatSuggestions(),
         recipeCards: _defaultChatRecipes(),
-        quickActions: const ['camera', 'voice', 'food-search'],
+        quickActions: _availableChatQuickActions(),
         contextSummary: _chatContextHeadline(),
       ),
     ];
@@ -1322,6 +1355,12 @@ class AppState extends ChangeNotifier {
           label: 'Bu yemek kaç kalori?', prompt: 'Bu yemek kaç kalori?'),
     ];
   }
+
+  List<String> _availableChatQuickActions() => [
+        if (AppConfig.photoMealInputEnabled) 'camera',
+        if (AppConfig.voiceMealInputEnabled) 'voice',
+        'food-search',
+      ];
 
   List<ChatRecipeCard> _defaultChatRecipes() {
     final meals = dailyPlan.take(3).toList();
@@ -1365,7 +1404,7 @@ class AppState extends ChangeNotifier {
             : 'Şu an protein hedefinde yaklaşık ${proteinLeft.clamp(0, 9999)} g boşluk var. Tavuk, yoğurt, yumurta veya baklagil iyi bir tamamlayıcı olur.',
         suggestionChips: _defaultChatSuggestions(),
         recipeCards: _defaultChatRecipes().take(2).toList(),
-        quickActions: const ['camera', 'voice', 'food-search'],
+        quickActions: _availableChatQuickActions(),
         contextSummary: _chatContextHeadline(),
       );
     }
@@ -1377,7 +1416,10 @@ class AppState extends ChangeNotifier {
             'Bugün hedefin ${progress.calorieTarget} kcal, şu ana kadar ${progress.consumedCalories} kcal aldın. Kalan yaklaşık ${remaining.clamp(0, 9999)} kcal. İstersen son öğününü de birlikte yorumlayayım.',
         suggestionChips: _defaultChatSuggestions(),
         recipeCards: _defaultChatRecipes().take(1).toList(),
-        quickActions: const ['camera', 'food-search'],
+        quickActions: [
+          if (AppConfig.photoMealInputEnabled) 'camera',
+          'food-search',
+        ],
         contextSummary: fasting.statusLabel,
       );
     }
@@ -1392,7 +1434,7 @@ class AppState extends ChangeNotifier {
         recipeCards: _defaultChatRecipes()
             .where((recipe) => recipe.mealType == MealType.dinner)
             .toList(),
-        quickActions: const ['camera', 'voice', 'food-search'],
+        quickActions: _availableChatQuickActions(),
         contextSummary: fasting.statusDetail,
       );
     }
@@ -1403,7 +1445,7 @@ class AppState extends ChangeNotifier {
           'Bugün hedefe yakın kalmak için yemekleri protein ağırlıklı ve sade tutmak iyi görünüyor. İstersen mevcut öğününü değerlendirip tek tek bakayım.',
       suggestionChips: _defaultChatSuggestions(),
       recipeCards: _defaultChatRecipes(),
-      quickActions: const ['camera', 'voice', 'food-search'],
+      quickActions: _availableChatQuickActions(),
       contextSummary: _chatContextHeadline(),
     );
   }
@@ -2055,26 +2097,39 @@ class AppState extends ChangeNotifier {
             fatGr: item is Map<String, dynamic>
                 ? (item['fatGr'] as num?)?.toInt() ?? 0
                 : 0,
+            confidence: item is Map<String, dynamic>
+                ? confidenceFromDb(item['confidence'])
+                : null,
           ),
         )
         .toList();
+    final meta = response['meta'];
+    final warnings = (response['warnings'] as List<dynamic>? ?? const [])
+        .map((e) => e.toString())
+        .toList();
+    if (meta is Map && meta['fallback_used'] == true) {
+      warnings.add(
+          'Bu sonuc yedek analizle hazirlandi; kaydetmeden once kontrol et.');
+    }
+    if (items.isEmpty) {
+      warnings.add(
+          'Besin eslesmesi bulunamadi. Food search ile manuel ekleme daha guvenilir olabilir.');
+    }
 
     return MealAnalysis(
       analysisId: response['analysisId']?.toString(),
       mealType: fallbackMealType,
-      confidence: Confidence.medium,
+      confidence: confidenceFromDb(response['confidence']) ?? Confidence.medium,
       totalCalories: (response['totalCalories'] as num?)?.toInt() ?? 0,
       macros: MacroTargets(
         proteinGr: (macros['proteinGr'] as num?)?.toInt() ?? 0,
         carbsGr: (macros['carbsGr'] as num?)?.toInt() ?? 0,
         fatGr: (macros['fatGr'] as num?)?.toInt() ?? 0,
       ),
-      detectedItems: items.isEmpty ? MockData.analysis.detectedItems : items,
+      detectedItems: items,
       sourceType: sourceType,
       sourceLabel: sourceLabel,
-      warnings: (response['warnings'] as List<dynamic>? ?? const [])
-          .map((e) => e.toString())
-          .toList(),
+      warnings: warnings,
     );
   }
 

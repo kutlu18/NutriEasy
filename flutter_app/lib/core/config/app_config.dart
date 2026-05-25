@@ -20,4 +20,29 @@ class AppConfig {
     'ANALYTICS_ENABLED',
     defaultValue: true,
   );
+
+  static const demoContentEnabled = bool.fromEnvironment(
+    'DEMO_CONTENT_ENABLED',
+    defaultValue: false,
+  );
+
+  static const photoMealInputEnabled = bool.fromEnvironment(
+    'PHOTO_MEAL_INPUT_ENABLED',
+    defaultValue: false,
+  );
+
+  static const voiceMealInputEnabled = bool.fromEnvironment(
+    'VOICE_MEAL_INPUT_ENABLED',
+    defaultValue: false,
+  );
+
+  static const premiumCheckoutEnabled = bool.fromEnvironment(
+    'PREMIUM_CHECKOUT_ENABLED',
+    defaultValue: false,
+  );
+
+  static const pushNotificationsEnabled = bool.fromEnvironment(
+    'PUSH_NOTIFICATIONS_ENABLED',
+    defaultValue: false,
+  );
 }

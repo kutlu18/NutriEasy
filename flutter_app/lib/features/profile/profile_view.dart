@@ -368,11 +368,14 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
         children: [
           _StatusCard(
             title: 'İzin durumu',
-            subtitle: _preferences.permissionGranted
-                ? 'Cihaz bildirimi izni verilmiş.'
-                : 'İzin verilmedi, hatırlatmalar mock modda tutuluyor.',
+            subtitle: state.pushNotificationsEnabled
+                ? (_preferences.permissionGranted
+                    ? 'Cihaz bildirimi izni verilmis.'
+                    : 'Bildirim izni henuz verilmedi.')
+                : 'Push bildirimi henuz aktif degil. Tercihlerin kaydedilir ama cihaz bildirimi gonderilmez.',
             trailing: FilledButton(
-              onPressed: _preferences.permissionGranted
+              onPressed: _preferences.permissionGranted ||
+                      !state.pushNotificationsEnabled
                   ? null
                   : () async {
                       await state.requestNotificationPermission();

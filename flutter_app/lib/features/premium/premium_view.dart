@@ -115,9 +115,22 @@ class _PremiumViewState extends State<PremiumView> {
                 )
               else
                 PrimaryButton(
-                  title: 'Devam et',
-                  icon: Icons.arrow_forward,
+                  title: state.premiumCheckoutEnabled
+                      ? 'Devam et'
+                      : 'Ciktiginda haber ver',
+                  icon: state.premiumCheckoutEnabled
+                      ? Icons.arrow_forward
+                      : Icons.notifications_active_outlined,
                   onPressed: () {
+                    if (!state.premiumCheckoutEnabled) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Odeme henuz aktif degil. Premium su an on izleme modunda.'),
+                        ),
+                      );
+                      return;
+                    }
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) =>
@@ -180,9 +193,20 @@ class PremiumPaymentView extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           PrimaryButton(
-            title: 'Satın al',
+            title: state.premiumCheckoutEnabled
+                ? 'Satin al'
+                : 'Odeme henuz aktif degil',
             icon: Icons.workspace_premium_outlined,
             onPressed: () async {
+              if (!state.premiumCheckoutEnabled) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                        'Odeme henuz aktif degil. Premium su an on izleme modunda.'),
+                  ),
+                );
+                return;
+              }
               await state.purchasePremium(selectedPlan);
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(

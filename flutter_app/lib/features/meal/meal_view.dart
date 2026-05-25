@@ -82,7 +82,8 @@ Future<void> showMealItemEditSheet(
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: 4),
-                        Text(item.unit, style: Theme.of(context).textTheme.bodySmall),
+                        Text(item.unit,
+                            style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                     const SizedBox(width: 16),
@@ -119,8 +120,13 @@ Future<void> showMealItemEditSheet(
                             });
                           },
                           backgroundColor: Colors.white,
-                          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                          shape: StadiumBorder(side: BorderSide(color: NutriColors.mint.withOpacity(0.8))),
+                          labelStyle: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          shape: StadiumBorder(
+                              side: BorderSide(
+                                  color: NutriColors.mint.withOpacity(0.8))),
                         ),
                       )
                       .toList(),
@@ -134,13 +140,26 @@ Future<void> showMealItemEditSheet(
                   ),
                   child: Row(
                     children: [
-                      Expanded(child: _MealStat(title: 'Kalori', value: '$calories', unit: 'kcal')),
-                      Container(width: 1, height: 36, color: const Color(0xFFE6E1EE)),
-                      Expanded(child: _MealStat(title: 'Protein', value: '$protein', unit: 'g')),
-                      Container(width: 1, height: 36, color: const Color(0xFFE6E1EE)),
-                      Expanded(child: _MealStat(title: 'Karb.', value: '$carbs', unit: 'g')),
-                      Container(width: 1, height: 36, color: const Color(0xFFE6E1EE)),
-                      Expanded(child: _MealStat(title: 'Yag', value: '$fat', unit: 'g')),
+                      Expanded(
+                          child: _MealStat(
+                              title: 'Kalori',
+                              value: '$calories',
+                              unit: 'kcal')),
+                      Container(
+                          width: 1, height: 36, color: const Color(0xFFE6E1EE)),
+                      Expanded(
+                          child: _MealStat(
+                              title: 'Protein', value: '$protein', unit: 'g')),
+                      Container(
+                          width: 1, height: 36, color: const Color(0xFFE6E1EE)),
+                      Expanded(
+                          child: _MealStat(
+                              title: 'Karb.', value: '$carbs', unit: 'g')),
+                      Container(
+                          width: 1, height: 36, color: const Color(0xFFE6E1EE)),
+                      Expanded(
+                          child: _MealStat(
+                              title: 'Yag', value: '$fat', unit: 'g')),
                     ],
                   ),
                 ),
@@ -173,6 +192,8 @@ class _MealLoggingSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(16),
@@ -192,27 +213,44 @@ class _MealLoggingSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Nasıl eklemek istiyorsun?', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Nasıl eklemek istiyorsun?',
+              style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
+          InlineMessage(
+            text:
+                'MVP icin en guvenilir akis yazarak eklemedir. Fotograf ve ses hazir olunca beta olarak acilacak.',
+            icon: Icons.info_outline,
+            backgroundColor: NutriColors.mintSoft,
+            foregroundColor: NutriColors.leaf,
+          ),
+          const SizedBox(height: 12),
+          PrimaryButton(
+            title: 'Yazarak ekle',
+            icon: Icons.chat_bubble_outline,
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TextMealInputView()));
+            },
+          ),
+          const SizedBox(height: 12),
           _EntryModeTile(
             icon: Icons.photo_camera_outlined,
             title: 'Fotoğrafla',
             subtitle: 'Hızlı kamera ya da galeri akışı',
             accent: const Color(0xFFB79AF3),
             onTap: () {
+              if (!state.photoMealInputEnabled) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'Fotografla analiz henuz aktif degil. Simdilik yazarak ekle.')),
+                );
+                return;
+              }
               Navigator.of(context).pop();
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PhotoMealInputView()));
-            },
-          ),
-          const SizedBox(height: 10),
-          _EntryModeTile(
-            icon: Icons.chat_bubble_outline,
-            title: 'Yazarak',
-            subtitle: 'En hızlı test edilebilir akış',
-            accent: NutriColors.leaf,
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TextMealInputView()));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const PhotoMealInputView()));
             },
           ),
           const SizedBox(height: 10),
@@ -222,8 +260,17 @@ class _MealLoggingSheet extends StatelessWidget {
             subtitle: 'Konuş, biz metne çevirelim',
             accent: const Color(0xFF9B59B6),
             onTap: () {
+              if (!state.voiceMealInputEnabled) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'Sesle ogun girisi henuz aktif degil. Simdilik yazarak ekle.')),
+                );
+                return;
+              }
               Navigator.of(context).pop();
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VoiceMealInputView()));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const VoiceMealInputView()));
             },
           ),
         ],
@@ -297,8 +344,14 @@ class TextMealInputView extends StatefulWidget {
 }
 
 class _TextMealInputViewState extends State<TextMealInputView> {
-  final textController = TextEditingController(text: '2 yumurta, 1 dilim tam buğday ekmeği ve domates');
+  final textController = TextEditingController();
   MealType mealType = MealType.lunch;
+
+  @override
+  void initState() {
+    super.initState();
+    textController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -326,7 +379,10 @@ class _TextMealInputViewState extends State<TextMealInputView> {
         children: [
           Text(
             'Yediğin her şeyi kısaca yaz, biz analizini çıkaralım.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NutriColors.muted),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: NutriColors.muted),
           ),
           const SizedBox(height: 16),
           Container(
@@ -340,7 +396,8 @@ class _TextMealInputViewState extends State<TextMealInputView> {
               controller: textController,
               minLines: 8,
               maxLines: 10,
-              style: const TextStyle(color: Colors.white, fontSize: 17, height: 1.45),
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 17, height: 1.45),
               decoration: const InputDecoration(
                 hintText: 'Örn: yarım tabak pilav + kuru fasulye + turşu',
                 hintStyle: TextStyle(color: Color(0xFF6D6D72)),
@@ -360,11 +417,16 @@ class _TextMealInputViewState extends State<TextMealInputView> {
                     onSelected: (_) => setState(() => mealType = type),
                     selectedColor: const Color(0xFFCDB8FF),
                     backgroundColor: Colors.white,
-                    labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: mealType == type ? Colors.black : NutriColors.ink,
+                    labelStyle: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(
+                          color:
+                              mealType == type ? Colors.black : NutriColors.ink,
                           fontWeight: FontWeight.w600,
                         ),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(99)),
                   ),
                 )
                 .toList(),
@@ -377,33 +439,40 @@ class _TextMealInputViewState extends State<TextMealInputView> {
             },
           ),
           const SizedBox(height: 18),
-          if (state.isAnalyzingMeal) const LinearProgressIndicator(color: NutriColors.leaf),
+          if (state.isAnalyzingMeal)
+            const LinearProgressIndicator(color: NutriColors.leaf),
           if (state.errorMessage != null) ...[
             const SizedBox(height: 12),
-            InlineMessage(text: state.errorMessage!, icon: Icons.warning_amber_rounded),
+            InlineMessage(
+                text: state.errorMessage!, icon: Icons.warning_amber_rounded),
           ],
           const SizedBox(height: 18),
           PrimaryButton(
-            title: 'Analiz et',
+            title: textController.text.trim().isEmpty
+                ? 'Once ogununu yaz'
+                : 'Tahmini analiz et',
             icon: Icons.auto_awesome,
             isBusy: state.isAnalyzingMeal,
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MealProcessingView(
-                    mealType: mealType,
-                    sourceType: MealSourceType.text,
-                    source: textController.text,
-                    sourceLabel: textController.text,
-                  ),
-                ),
-              );
-            },
+            onPressed: textController.text.trim().isEmpty
+                ? null
+                : () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => MealProcessingView(
+                          mealType: mealType,
+                          sourceType: MealSourceType.text,
+                          source: textController.text,
+                          sourceLabel: textController.text,
+                        ),
+                      ),
+                    );
+                  },
           ),
           const SizedBox(height: 18),
           const _HowItWorksCard(
-            title: 'Nasıl çalışır?',
-            subtitle: 'Bu akış Supabase Edge Function üzerinden analiz alır. Auth yoksa demo sonuç gösterilir.',
+            title: 'Guven notu',
+            subtitle:
+                'Bu akis canli analiz alir. Sonuc tahminidir; kaydetmeden once porsiyonu ve ogeleri kontrol edebilirsin.',
           ),
         ],
       ),
@@ -444,7 +513,10 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
           children: [
             Text(
               'Kamerayı aç ya da galeriden bir foto seç. Sonra porsiyonu hızlıca düzenleriz.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF9B9BA1)),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: const Color(0xFF9B9BA1)),
             ),
             const SizedBox(height: 18),
             Container(
@@ -454,7 +526,11 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF10141F), Color(0xFF6E5431), Color(0xFF15181D)],
+                  colors: [
+                    Color(0xFF10141F),
+                    Color(0xFF6E5431),
+                    Color(0xFF15181D)
+                  ],
                 ),
                 border: Border.all(color: const Color(0xFF9B7CF7), width: 2),
               ),
@@ -465,7 +541,8 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                       width: 240,
                       height: 240,
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFB794FF), width: 3),
+                        border: Border.all(
+                            color: const Color(0xFFB794FF), width: 3),
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
@@ -473,7 +550,9 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                   Positioned(
                     left: 16,
                     top: 16,
-                    child: _PhotoBadge(text: 'Yüksek doğruluk', icon: Icons.check_circle_outline),
+                    child: _PhotoBadge(
+                        text: 'Yüksek doğruluk',
+                        icon: Icons.check_circle_outline),
                   ),
                   Positioned(
                     left: 18,
@@ -483,28 +562,32 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => setState(() => selectedLabel = 'Galeriden seçilen yemek'),
+                            onPressed: () => setState(() =>
+                                selectedLabel = 'Galeriden seçilen yemek'),
                             icon: const Icon(Icons.photo_library_outlined),
                             label: const Text('Galeri'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.white,
                               side: const BorderSide(color: Color(0xFF2B2B31)),
                               minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () => setState(() => selectedLabel = 'Kamera ile çekilen yemek'),
+                            onPressed: () => setState(() =>
+                                selectedLabel = 'Kamera ile çekilen yemek'),
                             icon: const Icon(Icons.photo_camera_outlined),
                             label: const Text('Kamera'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF1B5E51),
                               foregroundColor: Colors.white,
                               minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
                           ),
                         ),
@@ -526,11 +609,16 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                       onSelected: (_) => setState(() => mealType = type),
                       selectedColor: const Color(0xFFB794FF),
                       backgroundColor: const Color(0xFF16161A),
-                      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: mealType == type ? Colors.black : Colors.white,
+                      labelStyle: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(
+                            color:
+                                mealType == type ? Colors.black : Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(99)),
                     ),
                   )
                   .toList(),
@@ -568,7 +656,8 @@ class VoiceMealInputView extends StatefulWidget {
 
 class _VoiceMealInputViewState extends State<VoiceMealInputView> {
   MealType mealType = MealType.breakfast;
-  final transcriptController = TextEditingController(text: '2 yumurta, bir dilim tam buğday ekmeği ve ...');
+  final transcriptController = TextEditingController(
+      text: '2 yumurta, bir dilim tam buğday ekmeği ve ...');
   bool isRecording = false;
 
   @override
@@ -580,7 +669,8 @@ class _VoiceMealInputViewState extends State<VoiceMealInputView> {
   Future<void> _simulateRecord() async {
     setState(() => isRecording = true);
     await Future<void>.delayed(const Duration(milliseconds: 1200));
-    transcriptController.text = '2 yumurta, 1 dilim tam buğday ekmeği, biraz peynir ve domates';
+    transcriptController.text =
+        '2 yumurta, 1 dilim tam buğday ekmeği, biraz peynir ve domates';
     if (!mounted) return;
     setState(() => isRecording = false);
   }
@@ -620,7 +710,10 @@ class _VoiceMealInputViewState extends State<VoiceMealInputView> {
             Center(
               child: Text(
                 isRecording ? 'Kayıt alınıyor...' : 'Kayıt için hazır',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(color: Colors.white),
               ),
             ),
             const SizedBox(height: 18),
@@ -655,11 +748,16 @@ class _VoiceMealInputViewState extends State<VoiceMealInputView> {
                       onSelected: (_) => setState(() => mealType = type),
                       selectedColor: const Color(0xFFB794FF),
                       backgroundColor: const Color(0xFF16161A),
-                      labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: mealType == type ? Colors.black : Colors.white,
+                      labelStyle: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(
+                            color:
+                                mealType == type ? Colors.black : Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(99)),
                     ),
                   )
                   .toList(),
@@ -693,7 +791,8 @@ class _VoiceMealInputViewState extends State<VoiceMealInputView> {
                 foregroundColor: Colors.white,
                 side: const BorderSide(color: Color(0xFF2B2B31)),
                 minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
               ),
               child: const Text('Analize gönder'),
             ),
@@ -759,7 +858,12 @@ class _MealProcessingViewState extends State<MealProcessingView> {
     }
 
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MealAnalysisView()));
+    if (state.selectedAnalysis == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MealAnalysisView()));
   }
 
   @override
@@ -797,12 +901,18 @@ class _MealProcessingViewState extends State<MealProcessingView> {
               const SizedBox(height: 24),
               Text(
                 'Nuri analiz yapıyor',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 10),
               Text(
                 'Kaynak: ${widget.sourceType.title}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF9B9BA1)),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: const Color(0xFF9B9BA1)),
               ),
               const SizedBox(height: 20),
               const SizedBox(
@@ -848,6 +958,8 @@ class MealAnalysisView extends StatelessWidget {
             );
           }
 
+          final isLowConfidence = analysis.confidence == Confidence.low;
+
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
             children: [
@@ -859,7 +971,11 @@ class MealAnalysisView extends StatelessWidget {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF16212B), Color(0xFF4A3620), Color(0xFF101214)],
+                      colors: [
+                        Color(0xFF16212B),
+                        Color(0xFF4A3620),
+                        Color(0xFF101214)
+                      ],
                     ),
                   ),
                   child: Stack(
@@ -909,7 +1025,10 @@ class MealAnalysisView extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         analysis.sourceLabel ?? 'Öğün açıklaması',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(color: Colors.white),
                       ),
                     ],
                   ),
@@ -933,13 +1052,29 @@ class MealAnalysisView extends StatelessWidget {
                             letterSpacing: 1.1,
                           ),
                     ),
+                    const SizedBox(height: 10),
+                    _StatusPill(
+                      icon: isLowConfidence
+                          ? Icons.warning_amber_rounded
+                          : Icons.verified_outlined,
+                      text: '${analysis.confidence.title} guven',
+                      background: isLowConfidence
+                          ? const Color(0xFF2A1D10)
+                          : const Color(0xFF101816),
+                      foreground: isLowConfidence
+                          ? NutriColors.amber
+                          : const Color(0xFF69F0AE),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
                           '${analysis.totalCalories}',
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
+                              ?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -949,7 +1084,10 @@ class MealAnalysisView extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
                             'kcal',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: const Color(0xFF8A8A93)),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: const Color(0xFF8A8A93)),
                           ),
                         ),
                       ],
@@ -960,20 +1098,44 @@ class MealAnalysisView extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _MacroBlock(label: 'Protein', value: '${analysis.macros.proteinGr}g'),
+                          child: _MacroBlock(
+                              label: 'Protein',
+                              value: '${analysis.macros.proteinGr}g'),
                         ),
-                        Container(width: 1, height: 44, color: const Color(0xFF2A2A2E)),
+                        Container(
+                            width: 1,
+                            height: 44,
+                            color: const Color(0xFF2A2A2E)),
                         Expanded(
-                          child: _MacroBlock(label: 'Karb.', value: '${analysis.macros.carbsGr}g'),
+                          child: _MacroBlock(
+                              label: 'Karb.',
+                              value: '${analysis.macros.carbsGr}g'),
                         ),
-                        Container(width: 1, height: 44, color: const Color(0xFF2A2A2E)),
+                        Container(
+                            width: 1,
+                            height: 44,
+                            color: const Color(0xFF2A2A2E)),
                         Expanded(
-                          child: _MacroBlock(label: 'Yağ', value: '${analysis.macros.fatGr}g'),
+                          child: _MacroBlock(
+                              label: 'Yağ', value: '${analysis.macros.fatGr}g'),
                         ),
                       ],
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 18),
+              InlineMessage(
+                text: isLowConfidence
+                    ? 'Bu tahmin dusuk guvenli. Kaydetmeden once porsiyonlari veya ogeleri duzenlemeni oneririz.'
+                    : 'Bu sonuc tahminidir. Kaydetmeden once porsiyonlari kontrol edebilirsin.',
+                icon: isLowConfidence
+                    ? Icons.warning_amber_rounded
+                    : Icons.info_outline,
+                backgroundColor: const Color(0xFF111826),
+                foregroundColor: isLowConfidence
+                    ? NutriColors.amber
+                    : const Color(0xFFB794FF),
               ),
               const SizedBox(height: 18),
               Text(
@@ -1020,14 +1182,16 @@ class MealAnalysisView extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () async {
                         await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const PortionEditView()),
+                          MaterialPageRoute(
+                              builder: (_) => const PortionEditView()),
                         );
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Color(0xFF2B2B31)),
                         minimumSize: const Size.fromHeight(54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
                       ),
                       child: const Text('Porsiyonu düzenle'),
                     ),
@@ -1037,14 +1201,16 @@ class MealAnalysisView extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () async {
                         await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const CorrectionView()),
+                          MaterialPageRoute(
+                              builder: (_) => const CorrectionView()),
                         );
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Color(0xFF2B2B31)),
                         minimumSize: const Size.fromHeight(54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
                       ),
                       child: const Text('Açıklamayla düzelt'),
                     ),
@@ -1053,8 +1219,12 @@ class MealAnalysisView extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               PrimaryButton(
-                title: state.isSavingMeal ? 'Kaydediliyor' : 'Kaydet',
-                icon: Icons.save_outlined,
+                title: state.isSavingMeal
+                    ? 'Kaydediliyor'
+                    : isLowConfidence
+                        ? 'Once duzenle veya kontrol et'
+                        : 'Kontrol et ve kaydet',
+                icon: isLowConfidence ? Icons.edit_note : Icons.save_outlined,
                 isBusy: state.isSavingMeal,
                 onPressed: () async {
                   await state.saveAnalysis();
@@ -1113,12 +1283,18 @@ class _PortionEditViewState extends State<PortionEditView> {
         children: [
           Text(
             analysis.sourceLabel ?? 'Öğün',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 8),
           Text(
             'Porsiyon tahmini. Gerekirse hızlıca değiştir.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF9B9BA1)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: const Color(0xFF9B9BA1)),
           ),
           const SizedBox(height: 20),
           Wrap(
@@ -1131,11 +1307,15 @@ class _PortionEditViewState extends State<PortionEditView> {
                     onSelected: (_) => setState(() => multiplier = entry.value),
                     selectedColor: const Color(0xFFB794FF),
                     backgroundColor: const Color(0xFF16161A),
-                    labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: (multiplier - entry.value).abs() < 0.01 ? Colors.black : Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+                    labelStyle:
+                        Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: (multiplier - entry.value).abs() < 0.01
+                                  ? Colors.black
+                                  : Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(99)),
                   ),
                 )
                 .toList(),
@@ -1160,7 +1340,10 @@ class _PortionEditViewState extends State<PortionEditView> {
                 const SizedBox(height: 8),
                 Text(
                   '$portionLabel porsiyon',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: const Color(0xFF8A8A93)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: const Color(0xFF8A8A93)),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -1168,33 +1351,44 @@ class _PortionEditViewState extends State<PortionEditView> {
                   children: [
                     _RoundStepButton(
                       icon: Icons.remove,
-                      onTap: () => setState(() => multiplier = (multiplier - 0.1).clamp(0.5, 2.0)),
+                      onTap: () => setState(() =>
+                          multiplier = (multiplier - 0.1).clamp(0.5, 2.0)),
                     ),
                     const SizedBox(width: 16),
                     Column(
                       children: [
                         Text(
                           multiplier.toStringAsFixed(1),
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'kat',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF9B9BA1)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: const Color(0xFF9B9BA1)),
                         ),
                       ],
                     ),
                     const SizedBox(width: 16),
                     _RoundStepButton(
                       icon: Icons.add,
-                      onTap: () => setState(() => multiplier = (multiplier + 0.1).clamp(0.5, 2.0)),
+                      onTap: () => setState(() =>
+                          multiplier = (multiplier + 0.1).clamp(0.5, 2.0)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 14),
                 Text(
                   '200 ml / 1 bardak gibi önceden bilinen birimlere göre ölçeklenir.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF9B9BA1)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: const Color(0xFF9B9BA1)),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -1255,7 +1449,10 @@ class _CorrectionViewState extends State<CorrectionView> {
         children: [
           Text(
             'AI yanıtını küçük bir notla iyileştir.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF9B9BA1)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: const Color(0xFF9B9BA1)),
           ),
           const SizedBox(height: 16),
           Container(
@@ -1293,14 +1490,17 @@ class _CorrectionViewState extends State<CorrectionView> {
                     onPressed: () => controller.text = label,
                     backgroundColor: const Color(0xFF16161A),
                     labelStyle: TextStyle(color: Colors.white),
-                    shape: StadiumBorder(side: BorderSide(color: Color(0xFF2A2A2E))),
+                    shape: StadiumBorder(
+                        side: BorderSide(color: Color(0xFF2A2A2E))),
                   ),
                 )
                 .toList(),
           ),
           const SizedBox(height: 18),
           PrimaryButton(
-            title: state.isCorrectingAnalysis ? 'Kaydediliyor' : 'Düzeltmeyi kaydet',
+            title: state.isCorrectingAnalysis
+                ? 'Kaydediliyor'
+                : 'Düzeltmeyi kaydet',
             icon: Icons.send_outlined,
             isBusy: state.isCorrectingAnalysis,
             onPressed: () async {
@@ -1345,11 +1545,18 @@ class MealDetailView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(meal.title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+          Text(meal.title,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(color: Colors.white)),
           const SizedBox(height: 8),
           Text(
             meal.mealType.title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFFB794FF)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: const Color(0xFFB794FF)),
           ),
           const SizedBox(height: 16),
           Container(
@@ -1362,15 +1569,24 @@ class MealDetailView extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: _MealStat(title: 'Kalori', value: '${meal.totalCalories}', unit: 'kcal'),
+                  child: _MealStat(
+                      title: 'Kalori',
+                      value: '${meal.totalCalories}',
+                      unit: 'kcal'),
                 ),
                 Container(width: 1, height: 42, color: const Color(0xFF2A2A2E)),
                 Expanded(
-                  child: _MealStat(title: 'Protein', value: '${meal.macros.proteinGr}', unit: 'g'),
+                  child: _MealStat(
+                      title: 'Protein',
+                      value: '${meal.macros.proteinGr}',
+                      unit: 'g'),
                 ),
                 Container(width: 1, height: 42, color: const Color(0xFF2A2A2E)),
                 Expanded(
-                  child: _MealStat(title: 'Karb.', value: '${meal.macros.carbsGr}', unit: 'g'),
+                  child: _MealStat(
+                      title: 'Karb.',
+                      value: '${meal.macros.carbsGr}',
+                      unit: 'g'),
                 ),
               ],
             ),
@@ -1419,19 +1635,38 @@ class MealItemRow extends StatelessWidget {
               color: const Color(0xFF1E1E22),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.restaurant_outlined, color: Colors.white70, size: 20),
+            child: const Icon(Icons.restaurant_outlined,
+                color: Colors.white70, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                Text(item.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(color: Colors.white)),
                 const SizedBox(height: 4),
                 Text(
                   '${item.quantity.toStringAsFixed(1)} ${item.unit}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF9B9BA1)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: const Color(0xFF9B9BA1)),
                 ),
+                if (item.confidence != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Guven: ${item.confidence!.title}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: item.confidence == Confidence.low
+                              ? NutriColors.amber
+                              : const Color(0xFF69F0AE),
+                        ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1440,11 +1675,17 @@ class MealItemRow extends StatelessWidget {
             children: [
               Text(
                 '${item.calories} kcal',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(color: Colors.white),
               ),
               Text(
                 'P ${item.proteinGr}  C ${item.carbsGr}  F ${item.fatGr}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF9B9BA1)),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: const Color(0xFF9B9BA1)),
               ),
             ],
           ),
@@ -1487,8 +1728,12 @@ class _QuickPillRow extends StatelessWidget {
             label: Text(text),
             onPressed: () => onTap(text),
             backgroundColor: Colors.white,
-            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            shape: StadiumBorder(side: BorderSide(color: NutriColors.mint.withOpacity(0.8))),
+            labelStyle: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w600),
+            shape: StadiumBorder(
+                side: BorderSide(color: NutriColors.mint.withOpacity(0.8))),
           );
         },
         separatorBuilder: (_, __) => const SizedBox(width: 8),
@@ -1512,7 +1757,8 @@ class _HowItWorksCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
-          BoxShadow(color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 10)),
+          BoxShadow(
+              color: Color(0x0A0D3A2A), blurRadius: 18, offset: Offset(0, 10)),
         ],
       ),
       child: Column(
@@ -1550,7 +1796,11 @@ class _PhotoBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: const Color(0xFF69F0AE)),
           const SizedBox(width: 8),
-          Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF69F0AE))),
+          Text(text,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: const Color(0xFF69F0AE))),
         ],
       ),
     );
@@ -1586,7 +1836,10 @@ class _StatusPill extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: foreground, fontWeight: FontWeight.w600),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: foreground, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -1604,16 +1857,25 @@ class _MacroBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF8A8A93))),
+        Text(label,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: const Color(0xFF8A8A93))),
         const SizedBox(height: 4),
-        Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+        Text(value,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: Colors.white)),
       ],
     );
   }
 }
 
 class _MealStat extends StatelessWidget {
-  const _MealStat({required this.title, required this.value, required this.unit});
+  const _MealStat(
+      {required this.title, required this.value, required this.unit});
 
   final String title;
   final String value;
@@ -1623,13 +1885,25 @@ class _MealStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(title, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF8A8A93))),
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: const Color(0xFF8A8A93))),
         const SizedBox(height: 6),
         RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: value, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
-              TextSpan(text: unit, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: const Color(0xFF8A8A93))),
+              TextSpan(
+                  text: value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w800)),
+              TextSpan(
+                  text: unit,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: const Color(0xFF8A8A93))),
             ],
           ),
         ),
@@ -1687,16 +1961,27 @@ class _MiniPortionRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                Text(item.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(color: Colors.white)),
                 const SizedBox(height: 4),
                 Text(
                   '$quantity ${item.unit}  •  ${item.proteinGr}P ${item.carbsGr}C ${item.fatGr}F',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF9B9BA1)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: const Color(0xFF9B9BA1)),
                 ),
               ],
             ),
           ),
-          Text('$calories kcal', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: const Color(0xFFB794FF))),
+          Text('$calories kcal',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(color: const Color(0xFFB794FF))),
         ],
       ),
     );

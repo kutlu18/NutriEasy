@@ -82,26 +82,34 @@ class DailyPlanView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              ...plan.map(
-                (meal) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _PlanMealCard(
-                    meal: meal,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => RecipeDetailView(meal: meal)),
-                    ),
-                    onApply: () async {
-                      await state.applyPlannedMeal(meal);
-                    },
-                    onAlternative: () => showAlternativeSheet(context, meal),
-                    onEdit: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => PlanEditView(meal: meal)),
+              if (plan.isEmpty)
+                const EmptyState(
+                  title: 'Bugun icin plan yok',
+                  subtitle:
+                      'Canli plan hazirlanana kadar ogunlerini yazarak ekleyebilir veya food search ile manuel ilerleyebilirsin.',
+                  icon: Icons.event_note_outlined,
+                )
+              else
+                ...plan.map(
+                  (meal) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _PlanMealCard(
+                      meal: meal,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => RecipeDetailView(meal: meal)),
+                      ),
+                      onApply: () async {
+                        await state.applyPlannedMeal(meal);
+                      },
+                      onAlternative: () => showAlternativeSheet(context, meal),
+                      onEdit: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => PlanEditView(meal: meal)),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         );
