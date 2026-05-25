@@ -7,7 +7,6 @@ import '../../core/models.dart';
 import '../../core/services/nutri_supabase_service.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
-import '../meal/meal_view.dart';
 
 Future<void> showFoodProductSheet(
   BuildContext context,
