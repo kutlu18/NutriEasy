@@ -1,210 +1,88 @@
-// photo_meal_input_view.dart — split from meal_view.dart for clarity.
+// photo_meal_input_view.dart — placeholder until the photo meal flow ships.
+//
+// The previous implementation contained mock gallery/camera buttons that only
+// mutated a local string ('Galeriden seçilen yemek'), a static 'Yüksek
+// doğruluk' badge that promised confidence without analysis, and a hardcoded
+// fallback 'Tavuk, pilav ve salata' that would silently reach MealProcessingView
+// if the user hit Analyze before tapping anything. With the photo flag still
+// gated off in MVP, the entry surfaces (Home hero card + meal logging sheet)
+// no longer reach here -- but if the user navigates back into a stale route,
+// they get an honest 'not ready yet' screen instead of a mock that lies.
+//
+// When the real photo flow ships, this file should be replaced with the
+// production implementation -- it isn't worth iterating on the mock between
+// now and then.
+
 import 'package:flutter/material.dart';
 
-import '../../core/models.dart';
+import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
-import 'meal_logging_sheet.dart';
-import 'meal_processing_view.dart';
-
-class PhotoMealInputView extends StatefulWidget {
+class PhotoMealInputView extends StatelessWidget {
   const PhotoMealInputView({super.key});
-
-  @override
-  State<PhotoMealInputView> createState() => _PhotoMealInputViewState();
-}
-
-class _PhotoMealInputViewState extends State<PhotoMealInputView> {
-  MealType mealType = MealType.lunch;
-  String selectedLabel = 'Tavuk, pilav ve salata';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: NutriColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        title: const Text('Fotoğrafla ekle'),
         centerTitle: true,
-        title: const Text('Öğününü fotoğrafla'),
-        actions: [
-          IconButton(
-            onPressed: () => showMealLoggingSheet(context),
-            icon: const Icon(Icons.bolt_outlined),
-          ),
-        ],
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          children: [
-            Text(
-              'Kamerayı aç ya da galeriden bir foto seç. Sonra porsiyonu hızlıca düzenleriz.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: const Color(0xFF9B9BA1)),
-            ),
-            const SizedBox(height: 18),
-            Container(
-              height: 500,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF10141F),
-                    Color(0xFF6E5431),
-                    Color(0xFF15181D)
-                  ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: NutriColors.mintSoft,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                border: Border.all(color: const Color(0xFF9B7CF7), width: 2),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Container(
-                      width: 240,
-                      height: 240,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: const Color(0xFFB794FF), width: 3),
-                        borderRadius: BorderRadius.circular(24),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: const BoxDecoration(
+                        color: NutriColors.leaf,
+                        shape: BoxShape.circle,
                       ),
+                      child: const Icon(Icons.photo_camera_outlined,
+                          color: Colors.white, size: 30),
                     ),
-                  ),
-                  const Positioned(
-                    left: 16,
-                    top: 16,
-                    child: _PhotoBadge(
-                        text: 'Yüksek doğruluk',
-                        icon: Icons.check_circle_outline),
-                  ),
-                  Positioned(
-                    left: 18,
-                    right: 18,
-                    bottom: 18,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => setState(() =>
-                                selectedLabel = 'Galeriden seçilen yemek'),
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: const Text('Galeri'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Color(0xFF2B2B31)),
-                              minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => setState(() =>
-                                selectedLabel = 'Kamera ile çekilen yemek'),
-                            icon: const Icon(Icons.photo_camera_outlined),
-                            label: const Text('Kamera'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1B5E51),
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 16),
+                    Text(
+                      'Fotoğrafla öğün ekleme yakında',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: MealType.values
-                  .map(
-                    (type) => ChoiceChip(
-                      label: Text(type.title),
-                      selected: mealType == type,
-                      onSelected: (_) => setState(() => mealType = type),
-                      selectedColor: const Color(0xFFB794FF),
-                      backgroundColor: const Color(0xFF16161A),
-                      labelStyle: Theme.of(context)
+                    const SizedBox(height: 10),
+                    Text(
+                      'Üzerinde çalışıyoruz. Hazır olduğunda tabağının fotoğrafını çekip AI’la '
+                      'analiz edebileceksin. Şimdilik öğünlerini yazarak ekleyebilirsin.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
                           .textTheme
                           .bodyMedium
-                          ?.copyWith(
-                            color:
-                                mealType == type ? Colors.black : Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(99)),
+                          ?.copyWith(color: NutriColors.muted),
                     ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 18),
-            PrimaryButton(
-              title: 'Analiz et',
-              icon: Icons.auto_awesome,
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => MealProcessingView(
-                      mealType: mealType,
-                      sourceType: MealSourceType.photo,
-                      source: selectedLabel,
-                      sourceLabel: selectedLabel,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  ],
+                ),
+              ),
+              const Spacer(),
+              PrimaryButton(
+                title: 'Yazarak eklemeye dön',
+                icon: Icons.chat_bubble_outline,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-class _PhotoBadge extends StatelessWidget {
-  const _PhotoBadge({
-    required this.text,
-    required this.icon,
-  });
-
-  final String text;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF101816),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF2A6F61)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: const Color(0xFF69F0AE)),
-          const SizedBox(width: 8),
-          Text(text,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: const Color(0xFF69F0AE))),
-        ],
-      ),
-    );
-  }
-}
-

@@ -109,6 +109,7 @@ class _TextMealInputViewState extends State<TextMealInputView> {
           ),
           const SizedBox(height: 16),
           _QuickPillRow(
+            mealType: mealType,
             onTap: (preset) {
               textController.text = preset;
               setState(() {});
@@ -166,18 +167,37 @@ class _TextMealInputViewState extends State<TextMealInputView> {
 }
 
 class _QuickPillRow extends StatelessWidget {
-  const _QuickPillRow({required this.onTap});
+  const _QuickPillRow({required this.mealType, required this.onTap});
 
+  final MealType mealType;
   final ValueChanged<String> onTap;
+
+  List<String> _examplesFor(MealType type) => switch (type) {
+        MealType.breakfast => const [
+            '2 yumurta, 1 dilim ekmek, peynir',
+            'Yulaf ezmesi + süt + muz',
+            'Menemen + 1 dilim ekmek',
+          ],
+        MealType.lunch => const [
+            'Tavuk + pilav + salata',
+            'Mercimek çorbası + bulgur pilavı',
+            'Izgara köfte + makarna + cacık',
+          ],
+        MealType.dinner => const [
+            'Fırın tavuk + sebze',
+            'Balık ızgara + salata',
+            'Sebze yemeği + yoğurt',
+          ],
+        MealType.snack => const [
+            'Yoğurt + meyve',
+            'Bir avuç badem',
+            'Tam buğday kraker + peynir',
+          ],
+      };
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      'Sabah kahvaltısı',
-      'Öğle yemeği',
-      'Ara öğün',
-      'Protein odaklı',
-    ];
+    final items = _examplesFor(mealType);
 
     return SizedBox(
       height: 46,

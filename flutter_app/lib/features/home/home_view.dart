@@ -84,7 +84,11 @@ class HomeView extends StatelessWidget {
                         builder: (_) => MealDetailView(meal: nextMeal))),
                   ),
                 const SizedBox(height: 24),
-                _MealSlots(meals: state.meals),
+                _MealSlots(
+                  meals: state.meals,
+                  onSlotTap: (type) =>
+                      showMealLoggingSheet(context, initialMealType: type),
+                ),
                 const SizedBox(height: 20),
                 _FastingInsightCard(
                   summary: state.fastingSnapshot,
@@ -479,9 +483,10 @@ class _NextMealCard extends StatelessWidget {
 }
 
 class _MealSlots extends StatelessWidget {
-  const _MealSlots({required this.meals});
+  const _MealSlots({required this.meals, required this.onSlotTap});
 
   final List<Meal> meals;
+  final ValueChanged<MealType> onSlotTap;
 
   @override
   Widget build(BuildContext context) {
@@ -500,6 +505,7 @@ class _MealSlots extends StatelessWidget {
               label: slots[index].$2,
               icon: slots[index].$3,
               active: meals.any((meal) => meal.mealType == slots[index].$1),
+              onTap: () => onSlotTap(slots[index].$1),
             ),
           ),
           if (index != slots.length - 1) const SizedBox(width: 8),
@@ -514,36 +520,42 @@ class _SlotPill extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.active,
+    required this.onTap,
   });
 
   final String label;
   final IconData icon;
   final bool active;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: active ? NutriColors.leaf : NutriColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [NutriColors.cardShadow],
-      ),
-      child: Column(
-        children: [
-          Icon(icon,
-              color: active ? Colors.white : NutriColors.muted, size: 20),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: active ? Colors.white : NutriColors.muted,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: active ? NutriColors.leaf : NutriColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [NutriColors.cardShadow],
+        ),
+        child: Column(
+          children: [
+            Icon(icon,
+                color: active ? Colors.white : NutriColors.muted, size: 20),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: active ? Colors.white : NutriColors.muted,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
