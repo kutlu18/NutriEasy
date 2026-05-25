@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
@@ -29,49 +31,48 @@ class HomeView extends StatelessWidget {
               children: [
                 const _HomeTopBar(),
                 const SizedBox(height: 56),
-                _Greeting(user: state.user),
+                _Greeting(user: state.user, tagline: state.homeGreeting),
                 const SizedBox(height: 32),
                 _DailySummaryCard(dashboard: dashboard),
                 const SizedBox(height: 26),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _HeroActionCard(
-                        title: 'Nuri',
-                        subtitle: 'Bana bir şeyler sor',
-                        icon: Icons.psychology_alt_outlined,
-                        highlighted: true,
-                        onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const NuriChatView())),
+                if (state.photoMealInputEnabled)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _HeroActionCard(
+                          title: 'Nuri',
+                          subtitle: 'Bana bir şeyler sor',
+                          icon: Icons.psychology_alt_outlined,
+                          highlighted: true,
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) => const NuriChatView())),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: _HeroActionCard(
-                        title: state.photoMealInputEnabled
-                            ? 'Yemek Tara'
-                            : 'Hızlı Ekle',
-                        subtitle: state.photoMealInputEnabled
-                            ? 'Kameranla keşfet'
-                            : 'Yazarak başla',
-                        icon: state.photoMealInputEnabled
-                            ? Icons.photo_camera_outlined
-                            : Icons.chat_bubble_outline,
-                        onTap: () {
-                          if (state.photoMealInputEnabled) {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const PhotoMealInputView()));
-                          } else {
-                            showMealLoggingSheet(context);
-                          }
-                        },
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: _HeroActionCard(
+                          title: 'Yemek Tara',
+                          subtitle: 'Kameranla keşfet',
+                          icon: Icons.photo_camera_outlined,
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) => const PhotoMealInputView())),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                else
+                  _HeroActionCard(
+                    title: 'Nuri',
+                    subtitle: 'Bana beslenmeyle ilgili bir şey sor',
+                    icon: Icons.psychology_alt_outlined,
+                    highlighted: true,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NuriChatView())),
+                  ),
                 const SizedBox(height: 30),
-                Text('Sıradaki Öğün',
+                Text('Son Eklediğin Öğün',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 14),
                 if (nextMeal == null)
@@ -116,12 +117,16 @@ class _HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppScope.of(context);
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 26,
-          backgroundColor: NutriColors.mintSoft,
-          child: Icon(Icons.person_outline, color: NutriColors.leaf),
+        GestureDetector(
+          onTap: () => unawaited(state.setMainTabIndex(4)),
+          child: const CircleAvatar(
+            radius: 26,
+            backgroundColor: NutriColors.mintSoft,
+            child: Icon(Icons.person_outline, color: NutriColors.leaf),
+          ),
         ),
         const Spacer(),
         Text(
@@ -143,20 +148,23 @@ class _HomeTopBar extends StatelessWidget {
 }
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({required this.user});
+  const _Greeting({required this.user, required this.tagline});
 
   final UserProfile user;
+  final String tagline;
 
   @override
   Widget build(BuildContext context) {
+    final displayName = user.name.trim().isEmpty ? 'Hoş geldin' : user.name;
+    final headline =
+        user.name.trim().isEmpty ? 'Hoş geldin' : 'Merhaba, $displayName';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Merhaba, ${user.name}',
-            style: Theme.of(context).textTheme.headlineMedium),
+        Text(headline, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
         Text(
-          'Bugün hedeflerine ulaşmak için harika bir gün.',
+          tagline,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: NutriColors.muted,
                 fontWeight: FontWeight.w500,
@@ -174,6 +182,7 @@ class _DailySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEmpty = dashboard.consumedCalories == 0;
     final consumedRatio = dashboard.calorieTarget == 0
         ? 0.0
         : (dashboard.consumedCalories / dashboard.calorieTarget)
@@ -227,18 +236,21 @@ class _DailySummaryCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '${dashboard.consumedCalories}',
+                          isEmpty
+                              ? '${dashboard.calorieTarget}'
+                              : '${dashboard.consumedCalories}',
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         Text(
-                          'KCAL',
+                          isEmpty ? 'KCAL HEDEFİN' : 'KCAL',
                           style:
                               Theme.of(context).textTheme.labelLarge?.copyWith(
                                     color: NutriColors.muted,
                                     letterSpacing: 1,
+                                    fontSize: isEmpty ? 10 : null,
                                   ),
                         ),
                       ],
@@ -297,6 +309,10 @@ class _MacroProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = target == 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
+    final isOver = target > 0 && value > target;
+    final valueText = isOver
+        ? '${value}g / ${target}g ✓'
+        : '$value/${target}g';
 
     return Column(
       children: [
@@ -309,7 +325,7 @@ class _MacroProgress extends StatelessWidget {
                         .titleSmall
                         ?.copyWith(color: NutriColors.muted))),
             Text(
-              '$value/${target}g',
+              valueText,
               style: Theme.of(context)
                   .textTheme
                   .titleSmall
@@ -574,21 +590,84 @@ class _FastingInsightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = summary.currentState == FastingStateLabel.active;
 
+    if (active) {
+      return NutriCard(
+        onTap: onTap,
+        color: const Color(0xFFEAF5F1),
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: const BoxDecoration(
+                    color: NutriColors.leaf,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.timer_outlined,
+                      color: Colors.white),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Oruç aktif',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 3),
+                      Text(summary.statusLabel,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                summary.timerLabel,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: NutriColors.leaf,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+              ),
+            ),
+            if (summary.metabolicPhaseLabel.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Center(
+                child: Text(
+                  summary.metabolicPhaseLabel,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: NutriColors.muted,
+                        letterSpacing: 0.4,
+                      ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // Inactive: compact row layout
     return NutriCard(
       onTap: onTap,
-      color: active ? const Color(0xFFEAF5F1) : NutriColors.surface,
+      color: NutriColors.surface,
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: active ? NutriColors.leaf : NutriColors.mintSoft,
+              color: NutriColors.mintSoft,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-                active ? Icons.timer_outlined : Icons.nightlight_outlined,
-                color: active ? Colors.white : NutriColors.leaf),
+            child: const Icon(Icons.nightlight_outlined,
+                color: NutriColors.leaf),
           ),
           const SizedBox(width: 14),
           Expanded(

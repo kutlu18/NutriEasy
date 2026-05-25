@@ -93,6 +93,27 @@ class AppState extends ChangeNotifier {
     );
   }
 
+  /// Home greeting cümlesi — kullanıcının günlük durumuna göre değişir.
+  /// Statik bir cümle (eski: "Bugün hedeflerine ulaşmak için harika bir gün.")
+  /// birkaç güne kadar gürültüye dönüşür. Bu getter, dashboard state'ine
+  /// bakıp 4 kuraldan birini döndürür.
+  String get homeGreeting {
+    if (meals.isEmpty) {
+      return 'Hadi ilk öğününü ekleyelim.';
+    }
+    final target = calorieTargetForProfile;
+    final consumed =
+        meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
+    final remaining = target - consumed;
+    if (remaining <= 0) {
+      return 'Bugün için yeterli — yarın yine başlarız.';
+    }
+    if (remaining < 300) {
+      return 'Sadece $remaining kcal kaldı.';
+    }
+    return 'Bugün için $remaining kcal daha hakkın var.';
+  }
+
   ProgressSummary get progressSnapshot =>
       progressSummary ?? _buildProgressSummary();
 
