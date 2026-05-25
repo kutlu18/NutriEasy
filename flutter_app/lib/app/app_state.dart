@@ -1713,7 +1713,7 @@ class AppState extends ChangeNotifier {
     });
 
     final streakDays = _calculateStreakDays(weeklyMeals);
-    final hydrationTarget = 8;
+    const hydrationTarget = 8;
     final hydrationCurrent = _estimateHydration(
         currentMeals: weeklyMeals.length, streakDays: streakDays);
     final stepsTarget = _stepsTargetForProfile;

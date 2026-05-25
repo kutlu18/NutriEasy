@@ -47,7 +47,7 @@ class _MealLoggingSheet extends StatelessWidget {
           Text('Nasıl eklemek istiyorsun?',
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
-          InlineMessage(
+          const InlineMessage(
             text:
                 'MVP icin en guvenilir akis yazarak eklemedir. Fotograf ve ses hazir olunca beta olarak acilacak.',
             icon: Icons.info_outline,
@@ -135,7 +135,7 @@ class _EntryModeTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: accent.withOpacity(0.18)),
+          border: Border.all(color: accent.withValues(alpha: 0.18)),
         ),
         child: Row(
           children: [
@@ -143,7 +143,7 @@ class _EntryModeTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: accent.withOpacity(0.14),
+                color: accent.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(icon, color: accent),

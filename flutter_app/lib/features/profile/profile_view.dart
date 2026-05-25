@@ -26,7 +26,7 @@ class ProfileView extends StatelessWidget {
             children: [
               _ProfileHeader(user: state.user),
               const SizedBox(height: 16),
-              SectionTitle(title: 'Hesap'),
+              const SectionTitle(title: 'Hesap'),
               const SizedBox(height: 10),
               _ActionItem(
                 title: 'Hesap ayarları',
@@ -43,7 +43,7 @@ class ProfileView extends StatelessWidget {
                   title: 'Öğün girişi',
                   value: state.user.preferredLoggingMethod.title),
               const SizedBox(height: 16),
-              SectionTitle(title: 'Hatırlatmalar'),
+              const SectionTitle(title: 'Hatırlatmalar'),
               const SizedBox(height: 10),
               _StatusCard(
                 title: 'Bildirim durumu',
@@ -74,7 +74,7 @@ class ProfileView extends StatelessWidget {
                 value: preferences.dailySummary ? 'Açık' : 'Kapalı',
               ),
               const SizedBox(height: 16),
-              SectionTitle(title: 'Ayarlar'),
+              const SectionTitle(title: 'Ayarlar'),
               const SizedBox(height: 10),
               _ActionItem(
                 title: 'Hesap ayarları',
@@ -209,7 +209,7 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            SectionTitle(title: 'Profil bilgileri'),
+            const SectionTitle(title: 'Profil bilgileri'),
             const SizedBox(height: 12),
             TextFormField(
               controller: _nameController,
@@ -253,7 +253,7 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<Goal>(
-              value: _goal,
+              initialValue: _goal,
               decoration: const InputDecoration(labelText: 'Hedef'),
               items: Goal.values
                   .map((goal) =>
@@ -263,7 +263,7 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<ActivityLevel>(
-              value: _activityLevel,
+              initialValue: _activityLevel,
               decoration: const InputDecoration(labelText: 'Aktivite seviyesi'),
               items: ActivityLevel.values
                   .map((level) =>
@@ -274,7 +274,7 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<LoggingMethod>(
-              value: _loggingMethod,
+              initialValue: _loggingMethod,
               decoration:
                   const InputDecoration(labelText: 'Öğün girişi tercihi'),
               items: LoggingMethod.values
@@ -418,11 +418,11 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
                 _preferences = _preferences.copyWith(dailySummary: value)),
           ),
           const SizedBox(height: 16),
-          _StatusCard(
+          const _StatusCard(
             title: 'Push hedefleri',
             subtitle:
                 'MVP aşamasında sistem bildirimi entegrasyonu yok, ama tercihlerin hazır tutuluyor.',
-            trailing: const Icon(Icons.notifications_active_outlined,
+            trailing: Icon(Icons.notifications_active_outlined,
                 color: NutriColors.leaf),
           ),
           const SizedBox(height: 20),

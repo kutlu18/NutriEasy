@@ -118,7 +118,7 @@ Future<void> showMealItemEditSheet(
                               ?.copyWith(fontWeight: FontWeight.w600),
                           shape: StadiumBorder(
                               side: BorderSide(
-                                  color: NutriColors.mint.withOpacity(0.8))),
+                                  color: NutriColors.mint.withValues(alpha: 0.8))),
                         ),
                       )
                       .toList(),

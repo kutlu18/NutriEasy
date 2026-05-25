@@ -182,7 +182,7 @@ class _QuickPillRow extends StatelessWidget {
                 .bodyMedium
                 ?.copyWith(fontWeight: FontWeight.w600),
             shape: StadiumBorder(
-                side: BorderSide(color: NutriColors.mint.withOpacity(0.8))),
+                side: BorderSide(color: NutriColors.mint.withValues(alpha: 0.8))),
           );
         },
         separatorBuilder: (_, __) => const SizedBox(width: 8),

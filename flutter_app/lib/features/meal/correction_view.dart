@@ -77,8 +77,8 @@ class _CorrectionViewState extends State<CorrectionView> {
                     label: Text(label),
                     onPressed: () => controller.text = label,
                     backgroundColor: const Color(0xFF16161A),
-                    labelStyle: TextStyle(color: Colors.white),
-                    shape: StadiumBorder(
+                    labelStyle: const TextStyle(color: Colors.white),
+                    shape: const StadiumBorder(
                         side: BorderSide(color: Color(0xFF2A2A2E))),
                   ),
                 )

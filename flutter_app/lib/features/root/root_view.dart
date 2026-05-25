@@ -62,7 +62,7 @@ class MainShellView extends StatelessWidget {
       bottomNavigationBar: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         decoration: BoxDecoration(
-          color: NutriColors.surface.withOpacity(0.96),
+          color: NutriColors.surface.withValues(alpha: 0.96),
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [NutriColors.cardShadow],
         ),

@@ -231,7 +231,7 @@ class FoodHubView extends StatelessWidget {
               ),
               if (history.isNotEmpty) ...[
                 const SizedBox(height: 18),
-                SectionHeader(title: 'Son aramalar'),
+                const SectionHeader(title: 'Son aramalar'),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -419,7 +419,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
           ],
           if (showDiscovery) ...[
             if (history.isNotEmpty) ...[
-              SectionHeader(title: 'Son aramalar'),
+              const SectionHeader(title: 'Son aramalar'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
@@ -889,7 +889,7 @@ class _MealTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final options = MealType.values;
+    const options = MealType.values;
 
     return Wrap(
       spacing: 8,

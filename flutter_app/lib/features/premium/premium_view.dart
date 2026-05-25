@@ -53,10 +53,10 @@ class _PremiumViewState extends State<PremiumView> {
               Text('Premium ile açılanlar',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 10),
-              Wrap(
+              const Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: const [
+                children: [
                   _BenefitChip(text: 'Haftalik plan'),
                   _BenefitChip(text: 'Derin AI yorumlar'),
                   _BenefitChip(text: 'Daha akilli alternatifler'),
@@ -65,7 +65,7 @@ class _PremiumViewState extends State<PremiumView> {
                 ],
               ),
               const SizedBox(height: 18),
-              SectionTitle(title: 'Plan secimi'),
+              const SectionTitle(title: 'Plan secimi'),
               const SizedBox(height: 10),
               _PlanCard(
                 plan: SubscriptionPlan.monthly,
@@ -81,7 +81,7 @@ class _PremiumViewState extends State<PremiumView> {
                     setState(() => _selectedPlan = SubscriptionPlan.yearly),
               ),
               const SizedBox(height: 18),
-              SectionTitle(title: 'Neden degiyor?'),
+              const SectionTitle(title: 'Neden degiyor?'),
               const SizedBox(height: 10),
               const _ValueList(),
               const SizedBox(height: 18),
@@ -161,11 +161,11 @@ class PremiumPaymentView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
-          SectionTitle(title: 'Seçilen plan'),
+          const SectionTitle(title: 'Seçilen plan'),
           const SizedBox(height: 10),
           _PlanCard(plan: selectedPlan, selected: true, onTap: null),
           const SizedBox(height: 18),
-          SectionTitle(title: 'Neleri acacaksin'),
+          const SectionTitle(title: 'Neleri acacaksin'),
           const SizedBox(height: 10),
           const _ValueList(),
           const SizedBox(height: 18),
@@ -387,8 +387,8 @@ class _ValueList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         _ValueRow(
           title: 'Haftalik plan',
           subtitle: 'Gunun ritmini takip eden rehber akisi.',

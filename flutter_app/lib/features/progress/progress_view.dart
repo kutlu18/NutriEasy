@@ -613,7 +613,7 @@ class _MiniMetric extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: tint.withOpacity(0.14),
+        color: tint.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -656,7 +656,7 @@ class _MacroRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: tint.withOpacity(0.1),
+        color: tint.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -822,7 +822,7 @@ class _TrendPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final fillPaint = Paint()
-      ..color = NutriColors.leaf.withOpacity(0.08)
+      ..color = NutriColors.leaf.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
 
     final minWeight = points.map((point) => point.weightKg).reduce(math.min);

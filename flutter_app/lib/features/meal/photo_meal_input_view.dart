@@ -74,7 +74,7 @@ class _PhotoMealInputViewState extends State<PhotoMealInputView> {
                       ),
                     ),
                   ),
-                  Positioned(
+                  const Positioned(
                     left: 16,
                     top: 16,
                     child: _PhotoBadge(

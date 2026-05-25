@@ -544,7 +544,7 @@ class _AchievementCard extends StatelessWidget {
             .map(
               (item) => Chip(
                 label: Text(item),
-                backgroundColor: NutriColors.amber.withOpacity(0.18),
+                backgroundColor: NutriColors.amber.withValues(alpha: 0.18),
                 labelStyle: const TextStyle(color: NutriColors.ink),
               ),
             )

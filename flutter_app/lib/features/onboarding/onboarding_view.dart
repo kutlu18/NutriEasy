@@ -179,7 +179,7 @@ class _ProfileStepState extends State<_ProfileStep> {
         TextField(controller: emailController, decoration: const InputDecoration(labelText: 'E-posta')),
         const SizedBox(height: 10),
         DropdownButtonFormField<Gender>(
-          value: gender,
+          initialValue: gender,
           items: Gender.values
               .map((g) => DropdownMenuItem(value: g, child: Text(g.title)))
               .toList(),

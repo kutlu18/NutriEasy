@@ -59,14 +59,14 @@ class MealAnalysisView extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      Positioned(
+                      const Positioned(
                         right: 16,
                         top: 16,
                         child: _StatusPill(
                           icon: Icons.verified_outlined,
                           text: 'Yüksek doğruluk',
-                          background: const Color(0xFF101816),
-                          foreground: const Color(0xFF69F0AE),
+                          background: Color(0xFF101816),
+                          foreground: Color(0xFF69F0AE),
                         ),
                       ),
                       Positioned(
@@ -339,7 +339,7 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: foreground.withOpacity(0.2)),
+        border: Border.all(color: foreground.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

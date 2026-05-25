@@ -241,7 +241,7 @@ class _PlanEditViewState extends State<PlanEditView> {
               decoration: const InputDecoration(labelText: 'Not'),
             ),
             const SizedBox(height: 16),
-            SectionHeader(title: 'Alternatifler'),
+            const SectionHeader(title: 'Alternatifler'),
             const SizedBox(height: 10),
             ...widget.meal!.alternatives.map(
               (alternative) => Padding(
@@ -335,7 +335,7 @@ class RecipeDetailView extends StatelessWidget {
             onSecondary: () => showAlternativeSheet(context, meal),
           ),
           const SizedBox(height: 18),
-          SectionHeader(title: 'Icerik'),
+          const SectionHeader(title: 'Icerik'),
           const SizedBox(height: 10),
           ...meal.ingredients.map(
             (ingredient) => Padding(
@@ -350,7 +350,7 @@ class RecipeDetailView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          SectionHeader(title: 'Yapilis'),
+          const SectionHeader(title: 'Yapilis'),
           const SizedBox(height: 10),
           ...meal.steps.asMap().entries.map(
                 (entry) => Padding(

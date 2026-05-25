@@ -23,7 +23,7 @@ class WelcomeView extends StatelessWidget {
                 'AID CORE SOLUTIONS',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: NutriColors.muted.withOpacity(0.72),
+                      color: NutriColors.muted.withValues(alpha: 0.72),
                       fontSize: 14,
                       letterSpacing: 4,
                       fontWeight: FontWeight.w800,
@@ -74,7 +74,7 @@ class WelcomeView extends StatelessWidget {
                 'Ücretsiz başla  •  Temel takip her zaman erişilebilir',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: NutriColors.muted.withOpacity(0.72),
+                      color: NutriColors.muted.withValues(alpha: 0.72),
                       fontWeight: FontWeight.w700,
                     ),
               ),
