@@ -10,7 +10,9 @@ import 'meal_logging_sheet.dart';
 import 'meal_processing_view.dart';
 
 class TextMealInputView extends StatefulWidget {
-  const TextMealInputView({super.key});
+  const TextMealInputView({super.key, this.initialMealType});
+
+  final MealType? initialMealType;
 
   @override
   State<TextMealInputView> createState() => _TextMealInputViewState();
@@ -18,11 +20,12 @@ class TextMealInputView extends StatefulWidget {
 
 class _TextMealInputViewState extends State<TextMealInputView> {
   final textController = TextEditingController();
-  MealType mealType = MealType.lunch;
+  late MealType mealType;
 
   @override
   void initState() {
     super.initState();
+    mealType = widget.initialMealType ?? MealType.lunch;
     textController.addListener(() => setState(() {}));
   }
 
@@ -121,9 +124,7 @@ class _TextMealInputViewState extends State<TextMealInputView> {
           ],
           const SizedBox(height: 18),
           PrimaryButton(
-            title: textController.text.trim().isEmpty
-                ? 'Once ogununu yaz'
-                : 'Tahmini analiz et',
+            title: 'Tahmini analiz et',
             icon: Icons.auto_awesome,
             isBusy: state.isAnalyzingMeal,
             onPressed: textController.text.trim().isEmpty
@@ -141,11 +142,22 @@ class _TextMealInputViewState extends State<TextMealInputView> {
                     );
                   },
           ),
+          if (textController.text.trim().isEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Devam etmek için birkaç kelime yaz.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: NutriColors.muted),
+              textAlign: TextAlign.center,
+            ),
+          ],
           const SizedBox(height: 18),
           const _HowItWorksCard(
-            title: 'Guven notu',
+            title: 'Güven notu',
             subtitle:
-                'Bu akis canli analiz alir. Sonuc tahminidir; kaydetmeden once porsiyonu ve ogeleri kontrol edebilirsin.',
+                'Bu akış canlı AI analizi yapar. Sonuç tahminidir; kaydetmeden önce porsiyonu ve öğeleri kontrol edebilirsin.',
           ),
         ],
       ),

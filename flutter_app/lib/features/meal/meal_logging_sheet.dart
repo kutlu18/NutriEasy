@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_scope.dart';
+import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
 
@@ -9,17 +10,22 @@ import 'text_meal_input_view.dart';
 import 'photo_meal_input_view.dart';
 import 'voice_meal_input_view.dart';
 
-void showMealLoggingSheet(BuildContext context) {
+/// Açar meal-logging seçim bottom sheet'i.
+/// [initialMealType] verilirse text/photo/voice ekranlarına ön-seçili mealType
+/// olarak iletilir (Home'daki meal-slot'lardan açılışlar için kullanılır).
+void showMealLoggingSheet(BuildContext context, {MealType? initialMealType}) {
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => const _MealLoggingSheet(),
+    builder: (_) => _MealLoggingSheet(initialMealType: initialMealType),
   );
 }
 
 class _MealLoggingSheet extends StatelessWidget {
-  const _MealLoggingSheet();
+  const _MealLoggingSheet({this.initialMealType});
+
+  final MealType? initialMealType;
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +50,12 @@ class _MealLoggingSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Nasıl eklemek istiyorsun?',
+          Text('Öğününü nasıl ekleyelim?',
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
           const InlineMessage(
             text:
-                'MVP icin en guvenilir akis yazarak eklemedir. Fotograf ve ses hazir olunca beta olarak acilacak.',
+                'Şimdilik en güvenilir yol yazarak eklemek. Fotoğraf ve ses çok yakında beta olarak açılacak.',
             icon: Icons.info_outline,
             backgroundColor: NutriColors.mintSoft,
             foregroundColor: NutriColors.leaf,
@@ -61,24 +67,23 @@ class _MealLoggingSheet extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const TextMealInputView()));
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TextMealInputView(initialMealType: initialMealType),
+                ),
+              );
             },
           ),
           const SizedBox(height: 12),
           _EntryModeTile(
             icon: Icons.photo_camera_outlined,
             title: 'Fotoğrafla',
-            subtitle: 'Hızlı kamera ya da galeri akışı',
+            subtitle: state.photoMealInputEnabled
+                ? 'Hızlı kamera ya da galeri akışı'
+                : 'Beta hazır olunca açılacak',
             accent: const Color(0xFFB79AF3),
+            disabled: !state.photoMealInputEnabled,
             onTap: () {
-              if (!state.photoMealInputEnabled) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Fotografla analiz henuz aktif degil. Simdilik yazarak ekle.')),
-                );
-                return;
-              }
               Navigator.of(context).pop();
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const PhotoMealInputView()));
@@ -88,17 +93,12 @@ class _MealLoggingSheet extends StatelessWidget {
           _EntryModeTile(
             icon: Icons.mic_none,
             title: 'Sesle',
-            subtitle: 'Konuş, biz metne çevirelim',
+            subtitle: state.voiceMealInputEnabled
+                ? 'Konuş, biz metne çevirelim'
+                : 'Beta hazır olunca açılacak',
             accent: const Color(0xFF9B59B6),
+            disabled: !state.voiceMealInputEnabled,
             onTap: () {
-              if (!state.voiceMealInputEnabled) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Sesle ogun girisi henuz aktif degil. Simdilik yazarak ekle.')),
-                );
-                return;
-              }
               Navigator.of(context).pop();
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => const VoiceMealInputView()));
@@ -117,6 +117,7 @@ class _EntryModeTile extends StatelessWidget {
     required this.subtitle,
     required this.accent,
     required this.onTap,
+    this.disabled = false,
   });
 
   final IconData icon;
@@ -124,46 +125,65 @@ class _EntryModeTile extends StatelessWidget {
   final String subtitle;
   final Color accent;
   final VoidCallback onTap;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: accent.withValues(alpha: 0.18)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(14),
+    return Opacity(
+      opacity: disabled ? 0.5 : 1.0,
+      child: InkWell(
+        onTap: disabled ? null : onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: accent.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: accent),
               ),
-              child: Icon(icon, color: accent),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-                ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right),
-          ],
+              if (disabled)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: NutriColors.surfaceHigh,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Yakında',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: NutriColors.muted,
+                        fontWeight: FontWeight.w700),
+                  ),
+                )
+              else
+                const Icon(Icons.chevron_right),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

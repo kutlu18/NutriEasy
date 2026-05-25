@@ -301,7 +301,7 @@ class MealAnalysisView extends StatelessWidget {
                 title: state.isSavingMeal
                     ? 'Kaydediliyor'
                     : isLowConfidence
-                        ? 'Once duzenle veya kontrol et'
+                        ? 'Önce düzenle veya kontrol et'
                         : 'Kontrol et ve kaydet',
                 icon: isLowConfidence ? Icons.edit_note : Icons.save_outlined,
                 isBusy: state.isSavingMeal,

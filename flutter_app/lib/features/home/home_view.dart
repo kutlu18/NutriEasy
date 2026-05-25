@@ -27,7 +27,7 @@ class HomeView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 112),
               children: [
-                _HomeTopBar(onAdd: () => showMealLoggingSheet(context)),
+                const _HomeTopBar(),
                 const SizedBox(height: 56),
                 _Greeting(user: state.user),
                 const SizedBox(height: 32),
@@ -37,7 +37,7 @@ class HomeView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _HeroActionCard(
-                        title: 'NutriAsistan',
+                        title: 'Nuri',
                         subtitle: 'Bana bir şeyler sor',
                         icon: Icons.psychology_alt_outlined,
                         highlighted: true,
@@ -49,12 +49,23 @@ class HomeView extends StatelessWidget {
                     const SizedBox(width: 18),
                     Expanded(
                       child: _HeroActionCard(
-                        title: 'Yemek Tara',
-                        subtitle: 'Kameranla keşfet',
-                        icon: Icons.photo_camera_outlined,
-                        onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const PhotoMealInputView())),
+                        title: state.photoMealInputEnabled
+                            ? 'Yemek Tara'
+                            : 'Hızlı Ekle',
+                        subtitle: state.photoMealInputEnabled
+                            ? 'Kameranla keşfet'
+                            : 'Yazarak başla',
+                        icon: state.photoMealInputEnabled
+                            ? Icons.photo_camera_outlined
+                            : Icons.chat_bubble_outline,
+                        onTap: () {
+                          if (state.photoMealInputEnabled) {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const PhotoMealInputView()));
+                          } else {
+                            showMealLoggingSheet(context);
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -97,9 +108,7 @@ class HomeView extends StatelessWidget {
 }
 
 class _HomeTopBar extends StatelessWidget {
-  const _HomeTopBar({required this.onAdd});
-
-  final VoidCallback onAdd;
+  const _HomeTopBar();
 
   @override
   Widget build(BuildContext context) {
@@ -119,12 +128,11 @@ class _HomeTopBar extends StatelessWidget {
               ),
         ),
         const Spacer(),
-        IconButton(
-          onPressed: onAdd,
-          icon: const Icon(Icons.notifications_none_rounded),
-          color: NutriColors.leafDark,
-          tooltip: 'Hatırlatmalar',
-        ),
+        // Görsel dengeyi korumak için sağ tarafa avatar boyutunda
+        // boş bir alan bırakıyoruz. Bildirim/hatırlatma akışı henüz
+        // hazır değil; gerçek kontrol gelene kadar yanıltıcı bir
+        // simge koymamayı tercih ediyoruz.
+        const SizedBox(width: 52),
       ],
     );
   }
@@ -445,7 +453,7 @@ class _NextMealCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   empty
-                      ? 'Yazarak, fotoğrafla veya sesle başlayabilirsin.'
+                      ? 'Yazarak hızlıca ilk öğününü ekle.'
                       : '${currentMeal!.totalCalories} kcal',
                   style: Theme.of(context)
                       .textTheme

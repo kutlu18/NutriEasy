@@ -228,7 +228,7 @@ class MealItemRow extends StatelessWidget {
                 if (item.confidence != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Guven: ${item.confidence!.title}',
+                    'Güven: ${item.confidence!.title}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: item.confidence == Confidence.low
                               ? NutriColors.amber
