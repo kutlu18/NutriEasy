@@ -16,11 +16,6 @@ class AppConfig {
     defaultValue: 'nutrieasy://reset-password',
   );
 
-  static const analyticsEnabled = bool.fromEnvironment(
-    'ANALYTICS_ENABLED',
-    defaultValue: true,
-  );
-
   static const demoContentEnabled = bool.fromEnvironment(
     'DEMO_CONTENT_ENABLED',
     defaultValue: false,

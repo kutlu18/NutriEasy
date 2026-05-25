@@ -6,6 +6,7 @@ import '../../app/app_scope.dart';
 import '../../app/app_state.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
+import '../../shared/widgets.dart';
 import '../food/food_view.dart';
 import '../meal/meal_view.dart';
 import '../plan/plan_view.dart';
@@ -290,7 +291,7 @@ class _ContextBand extends StatelessWidget {
                 child: Text('Nuri bağlamı',
                     style: Theme.of(context).textTheme.titleMedium),
               ),
-              _MiniPill(text: fastingLabel),
+              MiniPill(text: fastingLabel),
             ],
           ),
           const SizedBox(height: 8),
@@ -423,7 +424,7 @@ class _RecipeCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _MiniPill(
+                  MiniPill(
                       text: card.mealType == MealType.dinner
                           ? 'Akşam'
                           : card.mealType.title),
@@ -546,7 +547,7 @@ class _MessageBubble extends StatelessWidget {
                 runSpacing: 8,
                 children: message.quickActions
                     .map(
-                      (action) => _MiniPill(text: _quickActionLabel(action)),
+                      (action) => MiniPill(text: _quickActionLabel(action)),
                     )
                     .toList(),
               ),
@@ -682,30 +683,6 @@ class _ActionTile extends StatelessWidget {
         title: Text(title),
         subtitle: Text(subtitle),
         onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD0EBD6),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context)
-            .textTheme
-            .labelSmall
-            ?.copyWith(color: NutriColors.leaf, fontWeight: FontWeight.w700),
       ),
     );
   }

@@ -63,7 +63,7 @@ class _ProgressViewState extends State<ProgressView> {
             if (state.canAccessAdvancedInsights)
               _AdvancedInsightCard(summary: summary)
             else
-              _PremiumGateCard(
+              PremiumGateCard(
                 title: 'Gelişmiş içgörü',
                 subtitle: 'Premium ile trendler daha yorumlayici hale gelir.',
                 benefits: const [
@@ -762,60 +762,6 @@ class _InsightTile extends StatelessWidget {
           Text(label, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 4),
           Text(value, style: Theme.of(context).textTheme.titleMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _PremiumGateCard extends StatelessWidget {
-  const _PremiumGateCard({
-    required this.title,
-    required this.subtitle,
-    required this.benefits,
-    required this.onPressed,
-  });
-
-  final String title;
-  final String subtitle;
-  final List<String> benefits;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F1EE),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 12),
-          ...benefits.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: [
-                  const Icon(Icons.lock_outline,
-                      color: NutriColors.leaf, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(item)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          PrimaryButton(
-            title: 'Premium ac',
-            icon: Icons.workspace_premium_outlined,
-            onPressed: onPressed,
-          ),
         ],
       ),
     );

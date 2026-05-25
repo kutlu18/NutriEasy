@@ -65,7 +65,7 @@ class _PremiumViewState extends State<PremiumView> {
                 ],
               ),
               const SizedBox(height: 18),
-              _SectionTitle(title: 'Plan secimi'),
+              SectionTitle(title: 'Plan secimi'),
               const SizedBox(height: 10),
               _PlanCard(
                 plan: SubscriptionPlan.monthly,
@@ -81,7 +81,7 @@ class _PremiumViewState extends State<PremiumView> {
                     setState(() => _selectedPlan = SubscriptionPlan.yearly),
               ),
               const SizedBox(height: 18),
-              _SectionTitle(title: 'Neden degiyor?'),
+              SectionTitle(title: 'Neden degiyor?'),
               const SizedBox(height: 10),
               const _ValueList(),
               const SizedBox(height: 18),
@@ -161,11 +161,11 @@ class PremiumPaymentView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
-          _SectionTitle(title: 'Seçilen plan'),
+          SectionTitle(title: 'Seçilen plan'),
           const SizedBox(height: 10),
           _PlanCard(plan: selectedPlan, selected: true, onTap: null),
           const SizedBox(height: 18),
-          _SectionTitle(title: 'Neleri acacaksin'),
+          SectionTitle(title: 'Neleri acacaksin'),
           const SizedBox(height: 10),
           const _ValueList(),
           const SizedBox(height: 18),
@@ -363,17 +363,6 @@ class _PlanCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(title, style: Theme.of(context).textTheme.titleLarge);
   }
 }
 

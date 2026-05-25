@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_scope.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
+import '../../shared/widgets.dart';
 import '../fasting/fasting_view.dart';
 import '../premium/premium_view.dart' as premium;
 
@@ -25,7 +26,7 @@ class ProfileView extends StatelessWidget {
             children: [
               _ProfileHeader(user: state.user),
               const SizedBox(height: 16),
-              _SectionTitle(title: 'Hesap'),
+              SectionTitle(title: 'Hesap'),
               const SizedBox(height: 10),
               _ActionItem(
                 title: 'Hesap ayarları',
@@ -42,7 +43,7 @@ class ProfileView extends StatelessWidget {
                   title: 'Öğün girişi',
                   value: state.user.preferredLoggingMethod.title),
               const SizedBox(height: 16),
-              _SectionTitle(title: 'Hatırlatmalar'),
+              SectionTitle(title: 'Hatırlatmalar'),
               const SizedBox(height: 10),
               _StatusCard(
                 title: 'Bildirim durumu',
@@ -73,7 +74,7 @@ class ProfileView extends StatelessWidget {
                 value: preferences.dailySummary ? 'Açık' : 'Kapalı',
               ),
               const SizedBox(height: 16),
-              _SectionTitle(title: 'Ayarlar'),
+              SectionTitle(title: 'Ayarlar'),
               const SizedBox(height: 10),
               _ActionItem(
                 title: 'Hesap ayarları',
@@ -208,7 +209,7 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            _SectionTitle(title: 'Profil bilgileri'),
+            SectionTitle(title: 'Profil bilgileri'),
             const SizedBox(height: 12),
             TextFormField(
               controller: _nameController,
@@ -451,33 +452,6 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
   }
 }
 
-class PremiumView extends StatelessWidget {
-  const PremiumView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Premium')),
-      body: const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.workspace_premium, size: 56, color: NutriColors.amber),
-              SizedBox(height: 16),
-              Text('Premium ekranı mock',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-              SizedBox(height: 8),
-              Text('Ödeme entegrasyonu MVP dışında bırakıldı.'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({required this.user});
 
@@ -512,9 +486,9 @@ class _ProfileHeader extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _MiniPill(text: user.selectedGoal.title),
-                    _MiniPill(text: user.activityLevel.title),
-                    _MiniPill(text: user.preferredLoggingMethod.title),
+                    MiniPill(text: user.selectedGoal.title),
+                    MiniPill(text: user.activityLevel.title),
+                    MiniPill(text: user.preferredLoggingMethod.title),
                   ],
                 ),
               ],
@@ -523,17 +497,6 @@ class _ProfileHeader extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(title, style: Theme.of(context).textTheme.titleLarge);
   }
 }
 
@@ -621,26 +584,3 @@ class _ActionItem extends StatelessWidget {
   }
 }
 
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD0EBD6),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context)
-            .textTheme
-            .labelSmall
-            ?.copyWith(color: NutriColors.leaf, fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
