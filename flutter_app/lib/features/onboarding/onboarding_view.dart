@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../app/app_scope.dart';
-import '../../app/app_state.dart';
 import '../../core/models.dart';
 import '../../shared/design_system.dart';
 import '../../shared/widgets.dart';
@@ -500,7 +499,7 @@ class _LoggingStep extends StatelessWidget {
       if (photoEnabled && voiceEnabled) LoggingMethod.mixed,
     ];
 
-    bool _isComingSoon(LoggingMethod method) => switch (method) {
+    bool isComingSoon(LoggingMethod method) => switch (method) {
           LoggingMethod.text => false,
           LoggingMethod.photo => !photoEnabled,
           LoggingMethod.voice => !voiceEnabled,
@@ -523,7 +522,7 @@ class _LoggingStep extends StatelessWidget {
         const SizedBox(height: 16),
         ...methods.map(
           (method) {
-            final comingSoon = _isComingSoon(method);
+            final comingSoon = isComingSoon(method);
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(

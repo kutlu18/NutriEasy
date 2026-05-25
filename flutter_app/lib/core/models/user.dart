@@ -178,6 +178,7 @@ ActivityLevel activityLevelFromDb(Object? value) => switch (value?.toString()) {
 LoggingMethod loggingMethodFromDb(Object? value) => switch (value?.toString()) {
       'photo' => LoggingMethod.photo,
       'text' => LoggingMethod.text,
+      'voice' => LoggingMethod.voice,
       'mixed' => LoggingMethod.mixed,
       _ => LoggingMethod.mixed,
     };
@@ -209,6 +210,7 @@ String activityLevelDbValue(ActivityLevel value) => switch (value) {
 String loggingMethodDbValue(LoggingMethod value) => switch (value) {
       LoggingMethod.photo => 'photo',
       LoggingMethod.text => 'text',
+      LoggingMethod.voice => 'voice',
       LoggingMethod.mixed => 'mixed',
     };
 
@@ -248,12 +250,13 @@ extension ActivityLevelTitle on ActivityLevel {
 }
 
 
-enum LoggingMethod { photo, text, mixed }
+enum LoggingMethod { photo, text, voice, mixed }
 
 extension LoggingMethodTitle on LoggingMethod {
   String get title => switch (this) {
         LoggingMethod.photo => 'Fotoğraf',
         LoggingMethod.text => 'Yazı',
+        LoggingMethod.voice => 'Ses',
         LoggingMethod.mixed => 'Hepsi',
       };
 }
