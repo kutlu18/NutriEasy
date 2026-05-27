@@ -94,9 +94,9 @@ Future<void> showMealItemEditSheet(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    'Kucuk',
+                    'Küçük',
                     'Normal',
-                    'Buyuk',
+                    'Büyük',
                   ]
                       .map(
                         (label) => ActionChip(
@@ -104,9 +104,9 @@ Future<void> showMealItemEditSheet(
                           onPressed: () {
                             setSheetState(() {
                               quantity = switch (label) {
-                                'Kucuk' => item.quantity * 0.75,
+                                'Küçük' => item.quantity * 0.75,
                                 'Normal' => item.quantity,
-                                'Buyuk' => item.quantity * 1.25,
+                                'Büyük' => item.quantity * 1.25,
                                 _ => item.quantity,
                               };
                             });

@@ -188,7 +188,7 @@ class _NuriChatViewState extends State<NuriChatView> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content:
-                              Text('Fotografla analiz henuz aktif degil.')),
+                              Text('Fotoğrafla analiz henüz aktif değil.')),
                     );
                     return;
                   }
@@ -216,7 +216,7 @@ class _NuriChatViewState extends State<NuriChatView> {
                     Navigator.of(sheetContext).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Sesle giris henuz aktif degil.')),
+                          content: Text('Sesle giriş henüz aktif değil.')),
                     );
                     return;
                   }
@@ -227,7 +227,7 @@ class _NuriChatViewState extends State<NuriChatView> {
               ),
               _ActionTile(
                 icon: Icons.search,
-                title: 'Food search',
+                title: 'Besin ara',
                 subtitle: 'Manuel ürün ekle.',
                 onTap: () {
                   Navigator.of(sheetContext).pop();
@@ -713,7 +713,7 @@ String _quickActionLabel(String action) {
   return switch (action) {
     'camera' => 'Fotoğraf',
     'voice' => 'Ses',
-    'food-search' => 'Food search',
+    'food-search' => 'Besin ara',
     _ => action,
   };
 }

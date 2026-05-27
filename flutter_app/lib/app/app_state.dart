@@ -30,7 +30,7 @@ class AppState extends ChangeNotifier {
           ChatMessage(
             role: ChatRole.assistant,
             text:
-                'Merhaba, ben Nuri. Bugunku hedeflerine gore ogun kararlarinda yardimci olabilirim.',
+                'Merhaba, ben Nuri. Bugünkü hedeflerine göre öğün kararlarında yardımcı olabilirim.',
           ),
         ];
 
@@ -278,7 +278,7 @@ class AppState extends ChangeNotifier {
       }
 
       if (response.session == null) {
-        errorMessage = 'Kayit tamamlandi, e-posta dogrulamasi bekleniyor.';
+        errorMessage = 'Kayıt tamamlandı, e-posta doğrulaması bekleniyor.';
       }
 
       _applySessionToShell();
@@ -465,7 +465,7 @@ class AppState extends ChangeNotifier {
   Future<void> requestNotificationPermission() async {
     if (!AppConfig.pushNotificationsEnabled) {
       errorMessage =
-          'Bildirim entegrasyonu henuz aktif degil. Tercihlerin kaydedilebilir, ancak cihaz bildirimi gonderilmeyecek.';
+          'Bildirim entegrasyonu henüz aktif değil. Tercihlerin kaydedilebilir, ancak cihaz bildirimi gönderilmeyecek.';
       notifyListeners();
       return;
     }
@@ -482,7 +482,7 @@ class AppState extends ChangeNotifier {
   Future<void> purchasePremium(SubscriptionPlan plan) async {
     if (!AppConfig.premiumCheckoutEnabled) {
       errorMessage =
-          'Premium odeme henuz aktif degil. Bu ekran su an sadece on izleme olarak kullaniliyor.';
+          'Premium ödeme henüz aktif değil. Bu ekran şu an sadece ön izleme olarak kullanılıyor.';
       notifyListeners();
       return;
     }
@@ -541,7 +541,7 @@ class AppState extends ChangeNotifier {
   }) async {
     final text = source.trim();
     if (text.isEmpty) {
-      errorMessage = 'Analiz icin kisa bir ogun aciklamasi yazmalisin.';
+      errorMessage = 'Analiz için kısa bir öğün açıklaması yazmalısın.';
       notifyListeners();
       return;
     }
@@ -583,7 +583,7 @@ class AppState extends ChangeNotifier {
       } else {
         selectedAnalysis = null;
         errorMessage =
-            'Canli analiz icin giris yapmalisin. Istersen food search ile manuel ekleyebilirsin.';
+            'Canlı analiz için giriş yapmalısın. İstersen Besin ara ekranıyla manuel ekleyebilirsin.';
       }
     } catch (error) {
       selectedAnalysis = null;
@@ -602,14 +602,14 @@ class AppState extends ChangeNotifier {
     if (!AppConfig.photoMealInputEnabled) {
       selectedAnalysis = null;
       errorMessage =
-          'Fotografla analiz henuz aktif degil. Simdilik en guvenilir akis yazarak ogun eklemek.';
+          'Fotoğrafla analiz henüz aktif değil. Şimdilik en güvenilir akış yazarak öğün eklemek.';
       notifyListeners();
       return;
     }
 
     final label = sourceLabel.trim();
     if (label.isEmpty) {
-      errorMessage = 'Foto analiz icin kisa bir aciklama gerekli.';
+      errorMessage = 'Foto analiz için kısa bir açıklama gerekli.';
       notifyListeners();
       return;
     }
@@ -653,7 +653,7 @@ class AppState extends ChangeNotifier {
       } else {
         selectedAnalysis = null;
         errorMessage =
-            'Canli foto analiz icin giris yapmalisin. Simdilik yazarak ekleyebilirsin.';
+            'Canlı foto analiz için giriş yapmalısın. Şimdilik yazarak ekleyebilirsin.';
       }
     } catch (error) {
       selectedAnalysis = null;
@@ -672,7 +672,7 @@ class AppState extends ChangeNotifier {
     if (!AppConfig.voiceMealInputEnabled) {
       selectedAnalysis = null;
       errorMessage =
-          'Sesle ogun girisi henuz aktif degil. Simdilik metin akisini kullanabilirsin.';
+          'Sesle öğün girişi henüz aktif değil. Şimdilik metin akışını kullanabilirsin.';
       notifyListeners();
       return;
     }
@@ -1844,7 +1844,7 @@ class AppState extends ChangeNotifier {
       mealSinceStartCount: mealsSinceStart,
       weeklyInsight: plan.enabled
           ? 'Fasting plani hazir; baslatildiginda state otomatik guncellenecek.'
-          : 'Plan kapali görünüyor.',
+          : 'Plan kapalı görünüyor.',
       achievements: history.isNotEmpty
           ? ['Son fasting kaydı hazır']
           : ['İlk fasting oturumu için hazır'],
@@ -1942,23 +1942,23 @@ class AppState extends ChangeNotifier {
     final achievements = <String>[];
 
     if (streakDays >= 3) {
-      achievements.add('$streakDays gunluk kayit serisi');
+      achievements.add('$streakDays günlük kayıt serisi');
     }
 
     final proteinRatio = macroTargets.proteinGr == 0
         ? 0.0
         : consumedMacros.proteinGr / macroTargets.proteinGr;
     if (proteinRatio >= 0.8) {
-      achievements.add('Protein hedefinin %80+ seviyesine ulastin');
+      achievements.add('Protein hedefinin %80+ seviyesine ulaştın');
     }
 
     if (calorieBalance.abs() <= 250) {
-      achievements.add('Kalori dengesi hedefe yakin');
+      achievements.add('Kalori dengesi hedefe yakın');
     }
 
     if (achievements.isEmpty) {
       achievements
-          .add('Bu hafta yeni bir hedef yakalamak icin iyi bir baslangic var');
+          .add('Bu hafta yeni bir hedef yakalamak için iyi bir başlangıç var');
     }
 
     return achievements;
@@ -1977,14 +1977,14 @@ class AppState extends ChangeNotifier {
         ? 0.0
         : consumedMacros.proteinGr / macroTargets.proteinGr;
     final calorieLine = caloriesGap >= 0
-        ? 'Bu hafta kalori dengesi hedefe yakin; yaklasik ${caloriesGap ~/ 7} kcal gunluk acik var.'
-        : 'Bu hafta hedefin uzerine cikilmis; gunluk ortalama ${(-caloriesGap) ~/ 7} kcal fazla gorunuyor.';
+        ? 'Bu hafta kalori dengesi hedefe yakın; yaklaşık ${caloriesGap ~/ 7} kcal günlük acik var.'
+        : 'Bu hafta hedefin üzerine çıkılmış; günlük ortalama ${(-caloriesGap) ~/ 7} kcal fazla görünüyor.';
     final proteinLine = proteinRatio >= 0.8
-        ? 'Protein tarafi guclu ilerliyor.'
-        : 'Protein miktarini biraz artirmak hedefe daha hizli yaklastirir.';
+        ? 'Protein tarafi güçlü ilerliyor.'
+        : 'Protein miktarini biraz artırmak hedefe daha hızlı yaklaştırır.';
     final streakLine = streakDays >= 3
         ? 'Serin tutarlı gidiyor.'
-        : 'Bir kac gunluk düzenli kayıt, trendi daha net hale getirir.';
+        : 'Bir kac günlük düzenli kayıt, trendi daha net hale getirir.';
     final weightLine = estimatedDeltaKg >= 0
         ? 'Mevcut gidişat tahmini olarak ${estimatedDeltaKg.toStringAsFixed(1)} kg kayip potansiyeli gosteriyor.'
         : 'Mevcut gidişat tahmini olarak ${estimatedDeltaKg.abs().toStringAsFixed(1)} kg artis tarafinda.';
@@ -2122,11 +2122,11 @@ class AppState extends ChangeNotifier {
         .toList();
     if (meta is Map && meta['fallback_used'] == true) {
       warnings.add(
-          'Bu sonuc yedek analizle hazirlandi; kaydetmeden once kontrol et.');
+          'Bu sonuç yedek analizle hazırlandı; kaydetmeden önce kontrol et.');
     }
     if (items.isEmpty) {
       warnings.add(
-          'Besin eslesmesi bulunamadi. Food search ile manuel ekleme daha guvenilir olabilir.');
+          'Besin eşleşmesi bulunamadı. Besin ara ile manuel ekleme daha güvenilir olabilir.');
     }
 
     return MealAnalysis(

@@ -7,7 +7,7 @@ class AppErrorParser {
     }
 
     if (error is AuthSessionMissingException) {
-      return 'Oturum bulunamadi. Lutfen yeniden giris yap.';
+      return 'Oturum bulunamadı. Lütfen yeniden giriş yap.';
     }
 
     if (error is PostgrestException) {

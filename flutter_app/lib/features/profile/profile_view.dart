@@ -399,8 +399,8 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
             subtitle: state.pushNotificationsEnabled
                 ? (_preferences.permissionGranted
                     ? 'Cihaz bildirimi izni verilmis.'
-                    : 'Bildirim izni henuz verilmedi.')
-                : 'Push bildirimi henuz aktif degil. Tercihlerin kaydedilir ama cihaz bildirimi gonderilmez.',
+                    : 'Bildirim izni henüz verilmedi.')
+                : 'Push bildirimi henüz aktif değil. Tercihlerin kaydedilir ama cihaz bildirimi gonderilmez.',
             trailing: FilledButton(
               onPressed: _preferences.permissionGranted ||
                       !state.pushNotificationsEnabled

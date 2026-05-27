@@ -42,7 +42,7 @@ class DailyPlanView extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
-                'Plan, sadece bir liste degil. Bugun ne yiyecegini sade bir akista gosterir.',
+                'Plan, sadece bir liste değil. Bugün ne yiyeceğini sade bir akışta gosterir.',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -62,10 +62,10 @@ class DailyPlanView extends StatelessWidget {
                 PremiumGateCard(
                   title: 'Haftalik plan',
                   subtitle:
-                      'Premium ile haftanin akisini tek yerde gorebilirsin.',
+                      'Premium ile haftanin akışını tek yerde gorebilirsin.',
                   benefits: const [
-                    '7 gunluk rehber akis',
-                    'Ogun siralama optimizasyonu',
+                    '7 günlük rehber akış',
+                    'Öğün sıralama optimizasyonu',
                     'Akilli alternatifler',
                   ],
                   onPressed: () => Navigator.of(context).push(
@@ -75,7 +75,7 @@ class DailyPlanView extends StatelessWidget {
                 ),
               const SizedBox(height: 18),
               SectionHeader(
-                title: 'Ogun kartlari',
+                title: 'Öğün kartları',
                 actionLabel: 'Duzenle',
                 onAction: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PlanEditView()),
@@ -84,9 +84,9 @@ class DailyPlanView extends StatelessWidget {
               const SizedBox(height: 10),
               if (plan.isEmpty)
                 const EmptyState(
-                  title: 'Bugun icin plan yok',
+                  title: 'Bugün için plan yok',
                   subtitle:
-                      'Canli plan hazirlanana kadar ogunlerini yazarak ekleyebilir veya food search ile manuel ilerleyebilirsin.',
+                      'Canlı plan hazırlanana kadar öğünlerini yazarak ekleyebilir veya Besin ara ile manuel ilerleyebilirsin.',
                   icon: Icons.event_note_outlined,
                 )
               else
@@ -150,11 +150,11 @@ Future<void> showAlternativeSheet(
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Alternatif oneriler',
+              Text('Alternatif öneriler',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(
-                'Ayni ogun slotu icin hafif farkli secenekler.',
+                'Aynı öğün slotu için hafif farklı seçenekler.',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -165,7 +165,7 @@ Future<void> showAlternativeSheet(
                 const EmptyState(
                   title: 'Alternatif yok',
                   subtitle:
-                      'Bu kart icin simdilik baska bir secenek bulunmuyor.',
+                      'Bu kart için şimdilik baska bir seçenek bulunmuyor.',
                   icon: Icons.swap_horiz,
                 )
               else
@@ -222,12 +222,12 @@ class _PlanEditViewState extends State<PlanEditView> {
     final meals = widget.meal != null ? [widget.meal!] : state.dailyPlan;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan duzenle')),
+      appBar: AppBar(title: const Text('Plan düzenle')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           if (widget.meal != null) ...[
-            Text('Kart detayini duzenle',
+            Text('Kart detayını düzenle',
                 style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 8),
             TextField(
@@ -273,7 +273,7 @@ class _PlanEditViewState extends State<PlanEditView> {
               },
             ),
           ] else ...[
-            Text('Gunluk plan kartlari',
+            Text('Gunluk plan kartları',
                 style: Theme.of(context).textTheme.headlineLarge),
             const SizedBox(height: 8),
             Text(
@@ -398,7 +398,7 @@ class _DailySummaryCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Bugun',
+                  Text('Bugün',
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
@@ -850,7 +850,7 @@ class _WeeklyPlanPreviewCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
           Text(
-            'Bu hafta icin onerilen akis, ogunleri tek bakista toparlar.',
+            'Bu hafta için önerilen akış, öğünleri tek bakışta toparlar.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 12),

@@ -81,7 +81,7 @@ class _PremiumViewState extends State<PremiumView> {
                     setState(() => _selectedPlan = SubscriptionPlan.yearly),
               ),
               const SizedBox(height: 18),
-              const SectionTitle(title: 'Neden degiyor?'),
+              const SectionTitle(title: 'Neden değer?'),
               const SizedBox(height: 10),
               const _ValueList(),
               const SizedBox(height: 18),
@@ -126,7 +126,7 @@ class _PremiumViewState extends State<PremiumView> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                              'Odeme henuz aktif degil. Premium su an on izleme modunda.'),
+                              'Ödeme henüz aktif değil. Premium şu an ön izleme modunda.'),
                         ),
                       );
                       return;
@@ -157,7 +157,7 @@ class PremiumPaymentView extends StatelessWidget {
     final state = AppScope.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Odeme ozeti')),
+      appBar: AppBar(title: const Text('Ödeme ozeti')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
@@ -195,14 +195,14 @@ class PremiumPaymentView extends StatelessWidget {
           PrimaryButton(
             title: state.premiumCheckoutEnabled
                 ? 'Satin al'
-                : 'Odeme henuz aktif degil',
+                : 'Ödeme henüz aktif değil',
             icon: Icons.workspace_premium_outlined,
             onPressed: () async {
               if (!state.premiumCheckoutEnabled) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                        'Odeme henuz aktif degil. Premium su an on izleme modunda.'),
+                        'Ödeme henüz aktif değil. Premium şu an ön izleme modunda.'),
                   ),
                 );
                 return;
@@ -220,7 +220,7 @@ class PremiumPaymentView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Bu akış MVP icin mock odeme olarak calisir. Gercek odeme altyapisi sonra baglanacak.',
+            'Bu akış MVP için mock ödeme olarak çalışır. Gerçek ödeme altyapısı sonra bağlanacak.',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
@@ -340,7 +340,7 @@ class _PlanCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     plan == SubscriptionPlan.monthly
-                        ? 'Aylik denge isteyenler icin.'
+                        ? 'Aylık denge isteyenler için.'
                         : 'Yillik tasarruf ve daha az dusunme.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -356,7 +356,7 @@ class _PlanCard extends StatelessWidget {
                 if (selected)
                   const Icon(Icons.check_circle, color: NutriColors.leaf)
                 else
-                  Text('Sec', style: Theme.of(context).textTheme.labelLarge),
+                  Text('Seç', style: Theme.of(context).textTheme.labelLarge),
               ],
             ),
           ],
@@ -396,12 +396,12 @@ class _ValueList extends StatelessWidget {
         SizedBox(height: 10),
         _ValueRow(
           title: 'Gelişmiş AI yorumlari',
-          subtitle: 'Sadece sayi degil, karar ciktisi verir.',
+          subtitle: 'Sadece sayı değil, karar çıktısı verir.',
         ),
         SizedBox(height: 10),
         _ValueRow(
           title: 'Akilli alternatifler',
-          subtitle: 'Daha iyi uyumlayan besin ve ogun onerileri.',
+          subtitle: 'Daha iyi uyumlayan besin ve öğün önerileri.',
         ),
       ],
     );

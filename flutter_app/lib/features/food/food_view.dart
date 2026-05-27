@@ -363,7 +363,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
       setState(() {
         _results = const [];
         _isLoading = false;
-        _error = 'Arama basarisiz oldu. Lutfen tekrar deneyin.';
+        _error = 'Arama basarisiz oldu. Lütfen tekrar deneyin.';
       });
     }
   }
@@ -440,7 +440,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
             ],
             SectionHeader(
               title: 'Popüler ürünler',
-              actionLabel: 'Hizli ekle',
+              actionLabel: 'Hızlı ekle',
               onAction: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const QuickAddView())),
             ),
@@ -471,7 +471,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
           ] else ...[
             if (_results.isEmpty && !_isLoading)
               const EmptyState(
-                title: 'Sonuc yok',
+                title: 'Sonuç yok',
                 subtitle:
                     'Başka bir ürün adı deneyin ya da popüler ürünleri kullanın.',
                 icon: Icons.search_off,

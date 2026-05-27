@@ -136,7 +136,7 @@ class MealAnalysisView extends StatelessWidget {
                       icon: isLowConfidence
                           ? Icons.warning_amber_rounded
                           : Icons.verified_outlined,
-                      text: '${analysis.confidence.title} guven',
+                      text: '${analysis.confidence.title} güven',
                       background: isLowConfidence
                           ? const Color(0xFF2A1D10)
                           : const Color(0xFF101816),
@@ -206,8 +206,8 @@ class MealAnalysisView extends StatelessWidget {
               const SizedBox(height: 18),
               InlineMessage(
                 text: isLowConfidence
-                    ? 'Bu tahmin dusuk guvenli. Kaydetmeden once porsiyonlari veya ogeleri duzenlemeni oneririz.'
-                    : 'Bu sonuc tahminidir. Kaydetmeden once porsiyonlari kontrol edebilirsin.',
+                    ? 'Bu tahmin düşük güvenli. Kaydetmeden önce porsiyonları veya öğeleri düzenlemeni öneririz.'
+                    : 'Bu sonuç tahminidir. Kaydetmeden önce porsiyonları kontrol edebilirsin.',
                 icon: isLowConfidence
                     ? Icons.warning_amber_rounded
                     : Icons.info_outline,

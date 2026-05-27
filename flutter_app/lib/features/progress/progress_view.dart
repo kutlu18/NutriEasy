@@ -68,7 +68,7 @@ class _ProgressViewState extends State<ProgressView> {
                 subtitle: 'Premium ile trendler daha yorumlayici hale gelir.',
                 benefits: const [
                   'Haftalik yorumlar',
-                  'Derin makro baglanti',
+                  'Derin makro bağlantı',
                   'Daha akilli karar destek',
                 ],
                 onPressed: () => Navigator.of(context).push(
@@ -87,9 +87,9 @@ class _ProgressViewState extends State<ProgressView> {
             const SizedBox(height: 16),
             if (summary.isEmpty)
               EmptyState(
-                title: 'Henuz takip verisi yok',
+                title: 'Henüz takip verisi yok',
                 subtitle:
-                    'Ilk ogun kaydettiginde, kilo tahmini, kalori dengesi ve seri otomatik dolacak.',
+                    'Ilk öğün kaydettiginde, kilo tahmini, kalori dengesi ve seri otomatik dolacak.',
                 icon: Icons.timeline,
                 actionLabel: 'Ogün ekle',
                 onAction: () => state.setMainTabIndex(1),
@@ -131,7 +131,7 @@ class ProgressDetailView extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 8),
           Text(
-            'Veriler hedefe gore yorumlanir. Kilo trendi tahminidir; yeme kayitlarindan uretilir.',
+            'Veriler hedefe göre yorumlanır. Kilo trendi tahminidir; yeme kayıtlarından uretilir.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
@@ -201,7 +201,7 @@ class ProgressDetailView extends StatelessWidget {
           const SizedBox(height: 16),
           _DetailSection(
             title: 'Ipuclari',
-            subtitle: 'Bu hafta neden bu sekilde gorunuyor?',
+            subtitle: 'Bu hafta neden bu şekilde görünüyor?',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: summary.achievements
@@ -263,8 +263,8 @@ class _SummaryHero extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             positive
-                ? 'Haftalik hedefe yakin gidiyorsun.'
-                : 'Hedefin uzerinde gorunuyor; bu hafta biraz denge gerekebilir.',
+                ? 'Haftalik hedefe yakın gidiyorsun.'
+                : 'Hedefin üzerinde görünüyor; bu hafta biraz denge gerekebilir.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -285,7 +285,7 @@ class _SummaryHero extends StatelessWidget {
               Expanded(
                 child: _InlineStat(
                   label: 'Seri',
-                  value: '${summary.streakDays} gun',
+                  value: '${summary.streakDays} gün',
                 ),
               ),
             ],
@@ -362,7 +362,7 @@ class _TrendCard extends StatelessWidget {
                 child: MetricCard(
                   title: 'Kalori farki',
                   value: summary.calorieBalanceLabel,
-                  subtitle: 'Haftalik hedefe gore',
+                  subtitle: 'Haftalik hedefe göre',
                   tint: NutriColors.coral,
                 ),
               ),
@@ -433,8 +433,8 @@ class _SupportCard extends StatelessWidget {
         Expanded(
           child: MetricCard(
             title: 'Seri',
-            value: '${summary.streakDays} gun',
-            subtitle: 'Kayit devam ediyor',
+            value: '${summary.streakDays} gün',
+            subtitle: 'Kayıt devam ediyor',
             tint: NutriColors.amber,
           ),
         ),
@@ -452,7 +452,7 @@ class _AchievementCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _DetailSection(
       title: 'Haftalik oduller',
-      subtitle: 'Kucuk kazanclarin toplami',
+      subtitle: 'Küçük kazançların toplami',
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -521,9 +521,9 @@ class _DetailMetricGrid extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _MiniMetric(
-                title: 'Ogun',
+                title: 'Öğün',
                 value: '${summary.mealCount}',
-                subtitle: 'toplam kayit',
+                subtitle: 'toplam kayıt',
                 tint: NutriColors.mint,
                 icon: Icons.restaurant,
               ),
