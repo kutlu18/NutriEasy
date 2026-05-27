@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/analytics/app_analytics.dart';
 import '../core/config/app_config.dart';
 import '../core/errors/app_error_parser.dart';
+import '../core/insights/home_greeting.dart';
 import '../core/logging/app_logger.dart';
 import '../core/mock_data.dart';
 import '../core/models.dart';
@@ -94,25 +95,16 @@ class AppState extends ChangeNotifier {
   }
 
   /// Home greeting cümlesi — kullanıcının günlük durumuna göre değişir.
-  /// Statik bir cümle (eski: "Bugün hedeflerine ulaşmak için harika bir gün.")
-  /// birkaç güne kadar gürültüye dönüşür. Bu getter, dashboard state'ine
-  /// bakıp 4 kuraldan birini döndürür.
-  String get homeGreeting {
-    if (meals.isEmpty) {
-      return 'Hadi ilk öğününü ekleyelim.';
-    }
-    final target = calorieTargetForProfile;
-    final consumed =
-        meals.fold<int>(0, (sum, meal) => sum + meal.totalCalories);
-    final remaining = target - consumed;
-    if (remaining <= 0) {
-      return 'Bugün için yeterli — yarın yine başlarız.';
-    }
-    if (remaining < 300) {
-      return 'Sadece $remaining kcal kaldı.';
-    }
-    return 'Bugün için $remaining kcal daha hakkın var.';
-  }
+  /// Kural seti core/insights/home_greeting.dart içinde, böylece test
+  /// edilebilir ve genişletilebilir. Şu anda 4 ana boyut değerlendirir:
+  /// saat dilimi, hangi öğün slot'larının dolu olduğu, kalori durumu,
+  /// makro dengesi.
+  String get homeGreeting => buildHomeGreeting(
+        meals: meals,
+        calorieTarget: calorieTargetForProfile,
+        macroTargets: macroTargetsForProfile,
+        now: DateTime.now(),
+      );
 
   ProgressSummary get progressSnapshot =>
       progressSummary ?? _buildProgressSummary();

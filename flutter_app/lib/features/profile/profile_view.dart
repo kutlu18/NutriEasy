@@ -118,6 +118,33 @@ class ProfileView extends StatelessWidget {
                 },
                 trailing: const Icon(Icons.logout, color: NutriColors.coral),
               ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: NutriColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: NutriColors.surfaceHigh),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline,
+                        size: 18, color: NutriColors.muted),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'NutriEasy önerileri genel bilgi amaçlıdır, tıbbi tavsiye değildir. Klinik bir durumun varsa lütfen bir uzmana danışın.',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: NutriColors.muted, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           );
         },
