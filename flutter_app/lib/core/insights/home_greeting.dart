@@ -16,7 +16,6 @@
 // branch wins; later branches are fallbacks.
 
 import '../models/meal.dart';
-import '../models/user.dart';
 
 /// Public entry point. All inputs are pure state, no DateTime.now() call
 /// inside — caller supplies `now` so tests and previews can pin time.
