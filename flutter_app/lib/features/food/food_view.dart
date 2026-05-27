@@ -145,7 +145,7 @@ Future<void> showFoodProductSheet(
                           setModalState(() => quantity = nextValue),
                     ),
                     const SizedBox(height: 18),
-                    Text('Ogun tipi',
+                    Text('Öğün tipi',
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 10),
                     _MealTypeSelector(
@@ -155,7 +155,7 @@ Future<void> showFoodProductSheet(
                     ),
                     const SizedBox(height: 18),
                     PrimaryButton(
-                      title: 'Ogune ekle',
+                      title: 'Öğüne ekle',
                       icon: Icons.add_circle_outline,
                       isBusy: state.isSavingMeal,
                       onPressed: () async {
@@ -203,11 +203,11 @@ class FoodHubView extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              Text('Urun ara ve ekle',
+              Text('Ürün ara ve ekle',
                   style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
-                'Manuel ogun girişi, hizli ekleme ve urun detayi tek alanda.',
+                'Manuel öğün girişi, hızlı ekleme ve ürün detayı tek alanda.',
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -215,16 +215,16 @@ class FoodHubView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _ShortcutCard(
-                title: 'Food search',
-                subtitle: 'Besin veritabaninda ara',
+                title: 'Besin ara',
+                subtitle: 'Besin veritabanında ara',
                 icon: Icons.search,
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const FoodSearchView())),
               ),
               const SizedBox(height: 10),
               _ShortcutCard(
-                title: 'Quick add',
-                subtitle: 'Populer urunleri tek dokunusla ekle',
+                title: 'Hızlı ekle',
+                subtitle: 'Popüler ürünleri tek dokunuşla ekle',
                 icon: Icons.add_circle_outline,
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const QuickAddView())),
@@ -253,22 +253,22 @@ class FoodHubView extends StatelessWidget {
               ],
               const SizedBox(height: 18),
               SectionHeader(
-                title: 'Populer urunler',
-                actionLabel: 'Gozat',
+                title: 'Popüler ürünler',
+                actionLabel: 'Gözat',
                 onAction: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const FoodSearchView())),
               ),
               const SizedBox(height: 10),
               if (popular.isEmpty)
                 const EmptyState(
-                  title: 'Henuz populer urun yok',
+                  title: 'Henüz popüler ürün yok',
                   subtitle:
-                      'Ogunler kaydedildikce sik kullanilan urunler burada gorunur.',
+                      'Öğünler kaydedildikçe sık kullanılan ürünler burada görünür.',
                   icon: Icons.local_fire_department_outlined,
                 )
               else
                 SizedBox(
-                  height: 146,
+                  height: 180,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: popular.take(6).length,
@@ -376,7 +376,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
     final history = state.foodSearchHistory;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Urun ara')),
+      appBar: AppBar(title: const Text('Ürün ara')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -390,7 +390,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
               unawaited(_search(trimmed));
             },
             decoration: InputDecoration(
-              labelText: 'Urun ara',
+              labelText: 'Ürün ara',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _query.isEmpty
                   ? null
@@ -439,7 +439,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
               const SizedBox(height: 18),
             ],
             SectionHeader(
-              title: 'Populer urunler',
+              title: 'Popüler ürünler',
               actionLabel: 'Hizli ekle',
               onAction: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const QuickAddView())),
@@ -447,9 +447,9 @@ class _FoodSearchViewState extends State<FoodSearchView> {
             const SizedBox(height: 10),
             if (popular.isEmpty)
               const EmptyState(
-                title: 'Henuz urun yok',
+                title: 'Henüz ürün yok',
                 subtitle:
-                    'Kaydedilen ogunler burada populer urunlere donusecek.',
+                    'Kaydedilen öğünler burada popüler ürünlere dönüşecek.',
                 icon: Icons.local_fire_department_outlined,
               )
             else
@@ -473,7 +473,7 @@ class _FoodSearchViewState extends State<FoodSearchView> {
               const EmptyState(
                 title: 'Sonuc yok',
                 subtitle:
-                    'Baska bir urun adi deneyin ya da populer urunleri kullanin.',
+                    'Başka bir ürün adı deneyin ya da popüler ürünleri kullanın.',
                 icon: Icons.search_off,
               )
             else
@@ -502,14 +502,14 @@ class QuickAddView extends StatelessWidget {
     final popular = state.popularFoods;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Hizli ekle')),
+      appBar: AppBar(title: const Text('Hızlı ekle')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Quick add', style: Theme.of(context).textTheme.headlineLarge),
+          Text('Hızlı ekle', style: Theme.of(context).textTheme.headlineLarge),
           const SizedBox(height: 8),
           Text(
-            'Bir urune dokun, miktari sec ve gunune kaydet.',
+            'Bir ürüne dokun, miktarı seç ve gününe kaydet.',
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -518,9 +518,9 @@ class QuickAddView extends StatelessWidget {
           const SizedBox(height: 16),
           if (popular.isEmpty)
             const EmptyState(
-              title: 'Henuz populer urun yok',
+              title: 'Henüz popüler ürün yok',
               subtitle:
-                  'Birkac ogun kaydettikten sonra hizli ekleme onerileri buraya gelir.',
+                  'Birkaç öğün kaydettikten sonra hızlı ekleme önerileri buraya gelir.',
               icon: Icons.add_circle_outline,
             )
           else
@@ -738,7 +738,7 @@ class _PopularFoodCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              serving?.label ?? 'Quick add',
+              serving?.label ?? 'Hızlı ekle',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
